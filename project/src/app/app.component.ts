@@ -7,7 +7,7 @@ import { UserListComponent } from "./pages/user-list/user-list.component";
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, FormsModule,RouterOutlet],
+  imports: [CommonModule, FormsModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
