@@ -36,7 +36,8 @@ const allUsers=async(req,res)=>{
             email:user.email,
             weight:user.weight,
             height:user.height,
-            gender:user.gender
+            gender:user.gender,
+            age:user.age,
         }))
         res.status(200).json({
             success:true,
