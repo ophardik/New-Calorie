@@ -50,8 +50,14 @@
                                 <td data-label="Action">
                                     <div class="btn-set">
                <a class="btn btn-secondary" [routerLink]="['/user-data', user.id]">View</a>
-                                        <button class="btn-primary add-data-btn" data-toggle="modal"
-                                            data-target="#addDataModal">Add Data</button>
+               <button 
+               class="btn-primary add-data-btn" 
+               data-toggle="modal" 
+               data-target="#addDataModal"
+               (click)="onSelectUser(user)"  
+             >
+               Add Data
+             </button>
                                     </div>
                                 </td>
                             </tr>
@@ -94,10 +100,9 @@
                             <div class="input-field">
                                 <label>Select Food Name</label>
                                 <select class="selectbox"[(ngModel)]="foodData.foodName">
-                                    <option>Beans</option>
-                                    <option>Vegetable</option>
-                                    <option>Fast Food</option>
-                                    <option>fruits</option>
+                                    <option *ngFor="let food of foodList" [value]="food.foodName">
+                                        {{food.foodName}}
+                                    </option>
                                 </select>
                             </div>
                             <div class="input-field">
@@ -112,10 +117,9 @@
                             <div class="input-field">
                                 <label>Select Food Group</label>
                                 <select class="selectbox" [(ngModel)]="foodData.foodGroup">
-                                    <option>Beans</option>
-                                    <option>Vegetable</option>
-                                    <option>Fast Food</option>
-                                    <option>fruits</option>
+                                    <option *ngFor="let group of uniqueFoodGroups" [value]="group">
+                                        {{ group }}
+                                      </option>
                                 </select>
                             </div>
                             <div class="input-field">

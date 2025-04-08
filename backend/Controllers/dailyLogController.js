@@ -3,72 +3,96 @@ const userModel=require("../Models/userModel")
 const foodModel=require("../Models/foodModel")
 const activityModel=require("../Models/activityModel")
 const dailyLogModel=require("../Models/dailyLogModel")
-
+const mongoose=require("mongoose")
 const createLog = async (req, res) => {
-    try {
-      const { userId, date, foodLog, activityLog } = req.body;
-  
-      // Fetch user details
-      const user = await userModel.findById(userId);
-      if (!user) return res.status(404).json({ error: "User not found" });
-  
-      // Calculate BMR
-      let bmr = 0;
-      if (user.sex === "male") {
-        bmr = 66.4730 + (13.7516 * user.weight) + (5.0033 * user.height) - (6.7550 * user.age);
-      } else {
-        bmr = 655.0955 + (9.5634 * user.weight) + (1.8496 * user.height) - (4.6756 * user.age);
-      }
-  
-      if (isNaN(bmr)) throw new Error("BMR calculation resulted in NaN");
-  
-      // Calculate total food calories (Calories In)
-      let totalCaloriesIn = 0;
-      for (const entry of foodLog) {
-        const food = await foodModel.findById(entry.foodId);
-        if (!food) continue;
-        const calories = food.caloriesPerServing * entry.portion;
-        totalCaloriesIn += calories;
-      }
-  
-      if (isNaN(totalCaloriesIn)) throw new Error("Calories In calculation failed");
-  
-      // Calculate total activity calories (Calories Out)
-      let totalCaloriesOut = 0;
-      for (const entry of activityLog) {
-        const activity = await activityModel.findById(entry.activityId);
-        if (!activity) continue;
-        const caloriesBurned = activity.METs * user.weight * (entry.duration / 60);
-        totalCaloriesOut += caloriesBurned;
-      }
-  
-      if (isNaN(totalCaloriesOut)) throw new Error("Calories Out calculation failed");
-  
-      // Calculate net calories
-      const netCalories = totalCaloriesIn - bmr - totalCaloriesOut;
-  
-      if (isNaN(netCalories)) throw new Error("Net Calories calculation failed");
-  
-      // Create daily log entry
-      const newLog = new dailyLogModel({
-        userId,
-        date,
-        foodLog,
-        activityLog,
-        bmr,
-        totalCaloriesIn,
-        totalCaloriesOut,
-        netCalories
-      });
-  
-      await newLog.save();
-      res.status(201).json({ message: "Log created successfully", log: newLog });
-  
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ error: error.message || "Something went wrong" });
+  try {
+    const { userId, date, foodLog } = req.body;
+
+    // Validate userId
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ error: "Invalid userId format" });
     }
-  };
+
+    // Fetch user
+    const user = await userModel.findById(userId);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    // Calculate BMR
+    let bmr = 0;
+    if (user.gender === "male") {
+      bmr = 66.4730 + (13.7516 * user.weight) + (5.0033 * user.height) - (6.7550 * user.age);
+    } else {
+      bmr = 655.0955 + (9.5634 * user.weight) + (1.8496 * user.height) - (4.6756 * user.age);
+    }
+
+    bmr = parseFloat(bmr.toFixed(2));
+    if (isNaN(bmr)) {
+      return res.status(400).json({ error: "Failed to calculate BMR" });
+    }
+
+    // Calories In
+    let totalCaloriesIn = 0;
+    const enrichedFoodLog = [];
+
+    for (const entry of foodLog) {
+      const { foodId, portion, time } = entry;
+
+      const food = await foodModel.findById(foodId).lean();
+      if (!food) {
+        return res.status(404).json({ error: `Food item not found for ID: ${foodId}` });
+      }
+
+      const caloriesPerServing = Number(food.caloriesPerServing);
+      const validPortion = Number(portion);
+      const caloriesForEntry = caloriesPerServing * validPortion;
+
+      if (isNaN(caloriesForEntry)) {
+        return res.status(400).json({ error: "Invalid portion or caloriesPerServing" });
+      }
+
+      totalCaloriesIn += caloriesForEntry;
+
+      enrichedFoodLog.push({
+        foodId,
+        foodName: food.foodName,
+        caloriesPerServing,
+        portion: validPortion,
+        totalCalories: parseFloat(caloriesForEntry.toFixed(2)),
+        time,
+      });
+    }
+
+    totalCaloriesIn = parseFloat(totalCaloriesIn.toFixed(2));
+    const totalCaloriesOut = 0;
+    const netCalories = parseFloat((totalCaloriesIn - bmr).toFixed(2));
+
+    if (isNaN(totalCaloriesIn) || isNaN(netCalories)) {
+      return res.status(400).json({ error: "Invalid calorie values. Ensure correct food and portion data." });
+    }
+
+    // Save to DB
+    const newLog = new dailyLogModel({
+      userId,
+      date,
+      foodLog: enrichedFoodLog,
+      activityLog: [], // Not handled here
+      bmr,
+      totalCaloriesIn,
+      totalCaloriesOut,
+      netCalories,
+    });
+
+    await newLog.save();
+
+    res.status(201).json({ message: "Log created successfully", log: newLog });
+  } catch (error) {
+    console.error("Error creating daily log:", error);
+    res.status(500).json({ error: error.message || "Something went wrong" });
+  }
+};
+
+
+
   const getLogByDate = async (req, res) => {
     try {
       const { userId, date } = req.query;
@@ -82,5 +106,18 @@ const createLog = async (req, res) => {
       res.status(500).json({ message: 'Server error' });
     }
   };
+
+  const getAllLogs=async(req,res)=>{
+    try {
+      const {userId}=req.query;
+      const logs=await dailyLogModel.find({userId}).sort({date:-1})
+      .populate('foodLog.foodId')
+      .populate('activityLog.activityId')
+      return res.status(200).json({success:true,data:logs})
+    } catch (error) {
+      console.log("error in getting all logs",error)
+      return res.status(400).json({success:false,message:"Error in getting all logs"})
+    }
+  }
   
-  module.exports={createLog,getLogByDate}
+  module.exports={createLog,getLogByDate,getAllLogs}

@@ -57,78 +57,78 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <th scope="row">6/27/2022</th>
-                                    <td data-label="BMR">1535.245</td>
-                                    <td data-label="Calorie In">5878</td>
-                                    <td data-label="Calorie Out">58.78</td>
-                                    <td data-label="Net Calorie">-1200</td>
+                                <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">-{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th scope="row">6/26/2022</th>
-                                    <td data-label="BMR">1235.101</td>
-                                    <td data-label="Calorie In">4574</td>
-                                    <td data-label="Calorie Out">45.25</td>
-                                    <td data-label="Net Calorie">-1400</td>
+                                <!-- <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">-{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">6/25/2022</th>
-                                    <td data-label="BMR">1535.245</td>
-                                    <td data-label="Calorie In">5878</td>
-                                    <td data-label="Calorie Out">58.78</td>
-                                    <td data-label="Net Calorie">-1200</td>
+                                </tr> -->
+                                <!-- <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">6/24/2022</th>
-                                    <td data-label="BMR">1125.140</td>
-                                    <td data-label="Calorie In">4378</td>
-                                    <td data-label="Calorie Out">41.78</td>
-                                    <td data-label="Net Calorie">-1000</td>
+                                </tr> -->
+                                <!-- <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">6/23/2022</th>
-                                    <td data-label="BMR">1535.245</td>
-                                    <td data-label="Calorie In">5878</td>
-                                    <td data-label="Calorie Out">58.78</td>
-                                    <td data-label="Net Calorie">-1200</td>
+                                </tr> -->
+                                <!-- <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
-                                </tr>
-                                <tr>
-                                    <th scope="row">6/22/2022</th>
-                                    <td data-label="BMR">1125.140</td>
-                                    <td data-label="Calorie In">4378</td>
-                                    <td data-label="Calorie Out">41.78</td>
-                                    <td data-label="Net Calorie">-1000</td>
+                                </tr> -->
+                                <!-- <tr *ngFor="let log of allLogs">
+                                    <th scope="row">{{log.date}}</th>
+                                    <td data-label="BMR">{{log.bmr}}</td>
+                                    <td data-label="Calorie In">{{log.totalCaloriesIn}}</td>
+                                    <td data-label="Calorie Out">{{log.totalCaloriesOut}}</td>
+                                    <td data-label="Net Calorie">{{log.netCalories}}</td>
                                     <td data-label="Action">
                                         <div class="btn-set">
                                           <a class="btn-secondary" href="user-details.html">View</a>
                                         </div>
                                     </td>
-                                </tr>
+                                </tr> -->
                             </tbody>
                         </table>
                     </div>

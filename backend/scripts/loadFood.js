@@ -12,7 +12,7 @@ dotenv.config();
 //   useUnifiedTopology: true,
 // })
 // .then(() => {
-//   console.log("✅ MongoDB connected");
+//   console.log(" MongoDB connected");
 //   return insertData();
 // })
 // .catch((err) => console.error(" MongoDB connection error:", err));
