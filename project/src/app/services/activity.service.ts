@@ -12,4 +12,8 @@ export class ActivityService {
   addActivity(data:any){
     return this.http.post(`${this.baseUrl}/addUserActivity`,data)
   }
+
+  getAllActivity(){
+    return this.http.get("http://localhost:8002/activity/allActivity")
+  }
 }

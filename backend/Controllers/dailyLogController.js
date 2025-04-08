@@ -4,6 +4,7 @@ const foodModel=require("../Models/foodModel")
 const activityModel=require("../Models/activityModel")
 const dailyLogModel=require("../Models/dailyLogModel")
 const mongoose=require("mongoose")
+
 const createLog = async (req, res) => {
   try {
     const { userId, date, foodLog } = req.body;
@@ -90,7 +91,54 @@ const createLog = async (req, res) => {
     res.status(500).json({ error: error.message || "Something went wrong" });
   }
 };
+const createActivityLog = async (req, res) => {
+  try {
+    const { userId, activityId, duration, date } = req.body;
 
+    if (!userId || !activityId || !duration || !date) {
+      return res.status(400).json({ message: "Missing required fields." });
+    }
+
+    // Fetch user to get weight
+    const user = await userModel.findById(userId);
+    if (!user || !user.weight) {
+      return res.status(404).json({ message: "User or weight not found." });
+    }
+
+    // Fetch activity to get MET value
+    const activity = await activityModel.findById(activityId);
+    if (!activity || !activity.METs) {
+      return res.status(404).json({ message: "Activity or METs not found." });
+    }
+
+    // Convert duration from "hh:mm" to decimal hours
+    const [hours, minutes] = duration.split(':').map(Number);
+    const durationInHours = hours + (minutes / 60);
+
+    // Calculate caloriesOut
+    const caloriesOut = activity.METs * user.weight * durationInHours;
+
+    // Save the activity log
+    const newLog = await activityModel.create({
+      userId,
+      activityId,
+      duration,
+      date,
+      caloriesOut
+    });
+
+    return res.status(201).json({
+      message: "Activity log created successfully.",
+      data: newLog
+    });
+
+  } catch (error) {
+    console.log("❌ Error in creating activityLog:", error);
+    return res.status(500).json({
+      message: "Internal server error while creating activity log."
+    });
+  }
+};
 
 
   const getLogByDate = async (req, res) => {
@@ -120,4 +168,4 @@ const createLog = async (req, res) => {
     }
   }
   
-  module.exports={createLog,getLogByDate,getAllLogs}
+  module.exports={createLog,getLogByDate,getAllLogs,createActivityLog}

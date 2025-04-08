@@ -72,8 +72,8 @@ export class UserDataComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.userId = this.route.snapshot.paramMap.get('id') || localStorage.getItem("userId");
-
+    this.userId = this.route.snapshot.paramMap.get('id');
+   console.log("userId",this.userId)
     if (this.userId) {
       // Get all logs for the user
       this.dailyLogService.allDailyLog(this.userId).subscribe({

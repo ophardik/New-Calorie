@@ -20,8 +20,11 @@ export class UserListComponent {
  selectedUserId: string = '';
 
 foodList:any[]=[];
+activityList: any[]=[];
+
  foodData:any={
   userId:this.selectedUserId,
+  foodId:"",
   foodName:"",
   mealType:"",
   portion:"",
@@ -30,7 +33,7 @@ foodList:any[]=[];
 }
 
 activityData:any={
-  userId:localStorage.getItem("userId"),
+  userId:this.selectedUserId,
   activityName:'',
   date:'',
   duration:'',
@@ -39,6 +42,7 @@ activityData:any={
 
 }
   uniqueFoodGroups: any;
+  uniqueActivityGroups:any
 
 
  constructor(private userDetailService:UserDetailService,
@@ -50,37 +54,58 @@ activityData:any={
   }
   
 
-createDailyLog() {
-  if (!this.selectedUserId) {
-    alert("Please select a user before logging!");
-    return;
-  }
-
-  const payload = {
-    userId: this.selectedUserId,
-    date: this.foodData.date,
-    foodLog: [
-      {
-        foodId: this.foodData.foodId,
-        portion: this.foodData.portion,
-        time: this.foodData.time || '', // optional
-      }
-    ]
-  };
-
-  console.log("📤 Sending payload:", payload);
-
-  this.DailyLogService.createLog(payload).subscribe({
-    next: (res: any) => {
-      console.log("✅ Log created successfully", res);
-      alert("Log created successfully");
-    },
-    error: (err: any) => {
-      console.error("❌ Error while creating log", err);
+  createDailyLog() {  
+    if (!this.selectedUserId) {
+      alert("Please select a user before logging!");
+      return;
     }
-  });
-}
+  
+    const payload = {
+      userId: this.selectedUserId,
+      date: this.foodData.date,
+      foodLog: [
+        {
+          foodId: this.foodData.foodId,
+          portion: this.foodData.portion,
+          time: this.foodData.time || '',
+        }
+      ]
+    };
+  
+    console.log("📤 Sending payload:", payload);
+  
+    this.DailyLogService.createLog(payload).subscribe({
+      next: (res: any) => {
+        console.log("✅ Log created successfully", res);
+        alert("Log created successfully");
+  
+        // ✅ Show totalCaloriesIn on HTML side
+      },
+      error: (err: any) => {
+        console.error("❌ Error while creating log", err);
+      }
+    });
+  }
+  
 
+  
+  
+  onFoodChange() {
+    const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
+    if (selectedFood) {
+      this.foodData.foodName = selectedFood.foodName;
+    }
+  }
+  onAcitivityChange() {
+    const selectedActivity = this.activityList.find(
+      (a: any) => a._id === this.activityData.activityId
+    );
+    if (selectedActivity) {
+      this.activityData.activityName = selectedActivity.activityName;
+      this.activityData.METvalue = selectedActivity.METs;
+      console.log("Activity selected:", selectedActivity);
+    }
+  }
   
   
   
@@ -100,20 +125,49 @@ createDailyLog() {
     })
   }
 
-  onSaveActivity(){
-    console.log("activityData before saving", this.activityData); 
+  onSaveActivity() {
+    console.log("activityData before saving", this.activityData);
+  this.activityData.userId=this.selectedUserId
+    // 1. Get user weight (from users array using selected userId)
+    const selectedUser = this.users.find(user => user.id === this.activityData.userId);
+    console.log("selectedUser",selectedUser)
+    const weight = selectedUser?.weight || 0;
+  
+    // 2. Convert duration (hh:mm) to hours
+    const [hours, minutes] = this.activityData.duration.split(':').map(Number);
+    const durationInHours = hours + (minutes / 60);
+  
+    // 3. Calculate caloriesOut
+    const caloriesOut = this.activityData.METvalue * weight * durationInHours;
+  
+    // 👇 Optionally attach to activityData for saving or displaying
+    this.activityData.caloriesOut = caloriesOut;
+  
+    console.log("🔥 Calories Out:", caloriesOut);
+  
     this.AcitivityService.addActivity(this.activityData).subscribe({
-      next:(res)=>{
-        console.log("activity added",res);
-        this.activityData={};
-        alert("activity added")
+      next: (res) => {
+        console.log("activity added", res);
+        this.activityData = {};
+        alert("activity added");
+        this.createDailyLog()
       },
-
-     error:(err)=>{
-        console.log("error adding activity",err);
+      error: (err) => {
+        console.log("error adding activity", err);
       }
-    })
+    });
   }
+  getCaloriesOut(): number {
+    const selectedUser = this.users.find(user => user._id === this.activityData.userId);
+    const weight = selectedUser?.weight || 0;
+  
+    const [hours, minutes] = (this.activityData.duration || '0:0').split(':').map(Number);
+    const durationInHours = hours + (minutes / 60);
+  
+    return this.activityData.METvalue * weight * durationInHours;
+  }
+  
+  
  ngOnInit(){ // lifecycle hook return automatically when component is loaded
   this.userDetailService.getAllUsers().subscribe({
     next:(res:any)=>{
@@ -145,7 +199,43 @@ createDailyLog() {
       console.log("error fetching foodList", err);
     }
   });
+  this.AcitivityService.getAllActivity().subscribe({
+    next: (res: any) => {
+      console.log("fetched activityList", res);
   
- }
+      const allActivity = res.data || [];
+  
+      // 🔁 Fix typo + filter unique activity names
+      const uniqueActivityMap = new Map<string, any>();
+  
+      allActivity.forEach((activity: any) => {
+        // Fix the typo here
+        const activityName = activity.activityName || activity.acitivityName;
+  
+        if (!uniqueActivityMap.has(activityName)) {
+          uniqueActivityMap.set(activityName, {
+            ...activity,
+            activityName // ensure corrected key exists
+          });
+        }
+      });
+  
+      this.activityList = Array.from(uniqueActivityMap.values());
+  
+      // Optional: extract unique activityGroup if you still need it
+      const activityGroupSet = new Set<string>();
+      this.activityList.forEach((activity: any) => {
+        if (activity.activityGroup) {
+          activityGroupSet.add(activity.activityGroup);
+        }
+      });
+      this.uniqueActivityGroups = Array.from(activityGroupSet);
+  
+    },
+    error: (err) => {
+      console.log("error fetching activityList", err);
+    }
+  });
+ }  
  
 }

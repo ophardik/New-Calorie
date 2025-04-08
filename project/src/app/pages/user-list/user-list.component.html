@@ -99,13 +99,14 @@
 
                             <div class="input-field">
                                 <label>Select Food Name</label>
-                                <select class="selectbox"[(ngModel)]="foodData.foodName">
-                                    <option *ngFor="let food of foodList" [value]="food.foodName">
-                                        {{food.foodName}}
-                                    </option>
+                                <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()">
+                                  <option *ngFor="let food of foodList" [value]="food._id">
+                                    {{ food.foodName }}
+                                  </option>
                                 </select>
-                            </div>
-                            <div class="input-field">
+                              </div>
+                              
+                              <div class="input-field">
                                 <label>Select Meal Type</label>
                                 <select class="selectbox" [(ngModel)]="foodData.mealType">
                                     <option>Breakfast</option>
@@ -138,12 +139,13 @@
                             </div>
                             <div class="input-field">
                                 <label>Activity Name</label>
-                                <select class="selectbox" [(ngModel)]="activityData.activityName">
-                                    <option>Bicycling</option>
-                                    <option>Mountain</option>
-                                    <option>Racing</option>
+                                <select class="selectbox" [(ngModel)]="activityData.activityId" (change)="onAcitivityChange()">
+                                  <option *ngFor="let activity of activityList" [value]="activity._id">
+                                    {{ activity.activityName }}
+                                  </option>
                                 </select>
-                            </div>
+                              </div>
+                              
                             <div class="input-field">
                                 <label>Activity Description</label>
                                 <textarea placeholder="Description" [(ngModel)]="activityData.description"></textarea>
