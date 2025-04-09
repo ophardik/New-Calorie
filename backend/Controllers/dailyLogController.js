@@ -5,121 +5,194 @@ const dailyLogModel=require("../Models/dailyLogModel")
 const mongoose=require("mongoose")
 
 const createLog = async (req, res) => {
-  try {
-    const { userId, date, foodLog = [], activityLog = [] } = req.body;
+// try {
+//   const { userId, date, foodLog = [], activityLog = [], bmr = 0 } = req.body;
 
-    // Validate userId
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ error: "Invalid userId format" });
-    }
+//   const normalizedDate = new Date(date).toISOString().split("T")[0];
+//   let log = await dailyLogModel.findOne({ userId, date: new Date(normalizedDate) });
 
-    // Fetch user
-    const user = await userModel.findById(userId);
-    if (!user) return res.status(404).json({ error: "User not found" });
+//   if (!log) {
+//     log = new dailyLogModel({
+//       userId,
+//       date: new Date(normalizedDate),
+//       foodLog: [],
+//       activityLog: [],
+//       bmr: !isNaN(bmr) ? bmr : 0,
+//     });
+//   }
 
-    // Calculate BMR
-    let bmr = 0;
-    if (user.gender === "male") {
-      bmr = 66.4730 + (13.7516 * user.weight) + (5.0033 * user.height) - (6.7550 * user.age);
+//   // Append new logs
+//   if (foodLog.length > 0) log.foodLog.push(...foodLog);
+//   if (activityLog.length > 0) log.activityLog.push(...activityLog);
+
+//   // Calculate totalCaloriesIn
+//   let totalCaloriesIn = 0;
+
+//   for (const item of log.foodLog) {
+//     const food = await foodModel.findById(item.foodId).lean();
+//     console.log("food", food);
+  
+//     const portion = !isNaN(item.portion) ? item.portion : 1;
+//     const calories = (food?.caloriesPerServing || 0) * portion;
+  
+//     console.log("caloriesPerServing", food?.caloriesPerServing);
+//     console.log("portion", item.portion);
+//     console.log("calculatedCalories", calories);
+  
+//     item.caloriesIn = calories;
+//     totalCaloriesIn += calories;
+//   }
+  
+//   console.log("totalCaloriesIn",totalCaloriesIn)
+
+//   // Calculate totalCaloriesOut
+//   const weightInKg = 70;
+//   let totalCaloriesOut = 0;
+
+//   for (const item of log.activityLog) {
+//     const activity = await activityModel.findById(item.activityId);
+//     let minutes = 0;
+
+//     if (item.duration) {
+//       if (item.duration.includes(":")) {
+//         const [hh, mm] = item.duration.split(":").map(Number);
+//         if (!isNaN(hh) && !isNaN(mm)) minutes = hh * 60 + mm;
+//       } else {
+//         const parsed = parseInt(item.duration);
+//         if (!isNaN(parsed)) minutes = parsed;
+//       }
+//     }
+
+//     if (activity && typeof activity.METs === "number" && minutes > 0) {
+//       const durationInHours = minutes / 60;
+//       const caloriesOut = activity.METs * weightInKg * durationInHours;
+//       item.caloriesOut = Math.round(caloriesOut);
+//       totalCaloriesOut += item.caloriesOut;
+//     } else {
+//       item.caloriesOut = 0;
+//     }
+//   }
+
+//   log.totalCaloriesIn = totalCaloriesIn;
+//   log.totalCaloriesOut = totalCaloriesOut;
+//   const safeBMR = !isNaN(log.bmr) ? log.bmr : 0;
+
+//   log.netCalories = Math.round((safeBMR + totalCaloriesIn) - totalCaloriesOut);
+
+//   await log.save();
+
+//   res.status(200).json({
+//     message: "Log created or updated successfully",
+//     log,
+//   });
+
+// } catch (err) {
+//   console.error("Error in createOrUpdateDailyLog:", err);
+//   res.status(500).json({ error: err.message });
+// };
+  
+try {
+  const { userId, date, foodLog = [], activityLog = [] } = req.body;
+
+  const normalizedDate = new Date(date).toISOString().split("T")[0];
+  let log = await dailyLogModel.findOne({ userId, date: new Date(normalizedDate) });
+
+  const user = await userModel.findById(userId).lean();
+
+  let bmr = 0;
+
+  if (user) {
+    const weight = user.weight || 70;
+    const height = user.height || 170;
+    const gender = user.gender || 'male';
+    const age=user.age
+    
+
+    if (gender === 'male') {
+      bmr = Math.round(66.4730 + (13.7516 * weight) + (5.0033 * height) - (6.7550 * age));
     } else {
-      bmr = 655.0955 + (9.5634 * user.weight) + (1.8496 * user.height) - (4.6756 * user.age);
+      bmr = Math.round(655.0955 + (9.5634 * weight) + (1.8496 * height) - (4.6756 * age));
     }
-    bmr = parseFloat(bmr.toFixed(2));
 
-    // -------------------- Calories In --------------------
-    let totalCaloriesIn = 0;
-    const enrichedFoodLog = [];
-
-    for (const entry of foodLog) {
-      const { foodId, portion, time } = entry;
-      const food = await foodModel.findById(foodId).lean();
-      if (!food) {
-        return res.status(404).json({ error: `Food item not found for ID: ${foodId}` });
-      }
-
-      const caloriesPerServing = Number(food.caloriesPerServing);
-      const validPortion = Number(portion);
-      const caloriesForEntry = caloriesPerServing * validPortion;
-
-      if (isNaN(caloriesForEntry)) {
-        return res.status(400).json({ error: "Invalid portion or caloriesPerServing" });
-      }
-
-      totalCaloriesIn += caloriesForEntry;
-
-      enrichedFoodLog.push({
-        foodId,
-        foodName: food.foodName,
-        caloriesPerServing,
-        portion: validPortion,
-        totalCalories: parseFloat(caloriesForEntry.toFixed(2)),
-        time,
-      });
+    if (isNaN(bmr)) {
+      bmr = 0;
     }
-    totalCaloriesIn = parseFloat(totalCaloriesIn.toFixed(2));
-
-    // -------------------- Calories Out --------------------
-    let totalCaloriesOut = 0;
-    const enrichedActivityLog = [];
-
-    for (const activityEntry of activityLog) {
-      const { activityId, duration } = activityEntry;
-
-      const activity = await activityModel.findById(activityId).lean();
-      if (!activity || !activity.METs) {
-        return res.status(404).json({ error: `Activity not found for ID: ${activityId}` });
-      }
-
-      const [hours, minutes] = duration.split(":").map(Number);
-      const durationInHours = hours + (minutes / 60);
-      const caloriesOut = activity.METs * user.weight * durationInHours;
-
-      totalCaloriesOut += caloriesOut;
-
-      enrichedActivityLog.push({
-        activityId,
-        activityName: activity.activityName,
-        METs: activity.METs,
-        duration,
-        caloriesOut: parseFloat(caloriesOut.toFixed(2)),
-      });
-    }
-    totalCaloriesOut = parseFloat(totalCaloriesOut.toFixed(2));
-
-    // -------------------- Save or Update Log --------------------
-    let log = await dailyLogModel.findOne({ userId, date });
-
-    if (log) {
-      // Update existing log
-      log.foodLog.push(...enrichedFoodLog);
-      log.activityLog.push(...enrichedActivityLog);
-      log.totalCaloriesIn += totalCaloriesIn;
-      log.totalCaloriesOut += totalCaloriesOut;
-      log.netCalories = parseFloat((log.totalCaloriesIn - log.bmr - log.totalCaloriesOut).toFixed(2));
-
-      await log.save();
-      return res.status(200).json({ message: "Log updated successfully", log });
-    } else {
-      // Create new log
-      const newLog = new dailyLogModel({
-        userId,
-        date,
-        foodLog: enrichedFoodLog,
-        activityLog: enrichedActivityLog,
-        bmr,
-        totalCaloriesIn,
-        totalCaloriesOut,
-        netCalories: parseFloat((totalCaloriesIn - bmr - totalCaloriesOut).toFixed(2)),
-      });
-
-      await newLog.save();
-      return res.status(201).json({ message: "Log created successfully", log: newLog });
-    }
-  } catch (error) {
-    console.error("Error creating/updating daily log:", error);
-    res.status(500).json({ error: error.message || "Something went wrong" });
   }
-};
+
+  if (!log) {
+    log = new dailyLogModel({
+      userId,
+      date: new Date(normalizedDate),
+      foodLog: [],
+      activityLog: [],
+      bmr: bmr,
+    });
+  } else {
+    log.bmr = bmr;
+  }
+
+  if (foodLog.length > 0) log.foodLog.push(...foodLog);
+  if (activityLog.length > 0) log.activityLog.push(...activityLog);
+
+  let totalCaloriesIn = 0;
+
+  for (const item of log.foodLog) {
+    const food = await foodModel.findById(item.foodId).lean();
+    const portion = !isNaN(item.portion) ? item.portion : 1;
+    const calories = (food?.caloriesPerServing || 0) * portion;
+    item.caloriesIn = calories;
+    totalCaloriesIn += calories;
+  }
+
+  const weightInKg = 70;
+  let totalCaloriesOut = 0;
+
+  for (const item of log.activityLog) {
+    const activity = await activityModel.findById(item.activityId);
+    let minutes = 0;
+
+    if (item.duration) {
+      if (item.duration.includes(":")) {
+        const [hh, mm] = item.duration.split(":").map(Number);
+        if (!isNaN(hh) && !isNaN(mm)) minutes = hh * 60 + mm;
+      } else {
+        const parsed = parseInt(item.duration);
+        if (!isNaN(parsed)) minutes = parsed;
+      }
+    }
+
+    if (activity && typeof activity.METs === "number" && minutes > 0) {
+      const durationInHours = minutes / 60;
+      const caloriesOut = activity.METs * weightInKg * durationInHours;
+      item.caloriesOut = Math.round(caloriesOut);
+      totalCaloriesOut += item.caloriesOut;
+    } else {
+      item.caloriesOut = 0;
+    }
+  }
+
+  log.totalCaloriesIn = totalCaloriesIn;
+  log.totalCaloriesOut = totalCaloriesOut;
+
+  const safeBMR = !isNaN(log.bmr) ? log.bmr : 0;
+  log.netCalories = Math.round((safeBMR + totalCaloriesIn) - totalCaloriesOut);
+
+  await log.save();
+
+  res.status(200).json({
+    message: "Log created or updated successfully",
+    log,
+  });
+
+} catch (err) {
+  console.error("Error in createOrUpdateDailyLog:", err);
+  res.status(500).json({ error: err.message });
+}
+
+
+
+}
+
 
 
 // const createActivityLog = async (req, res) => {
@@ -274,6 +347,7 @@ const createActivityLog = async (req, res) => {
       res.status(500).json({ message: 'Server error' });
     }
   };
+  
   const getAllLogs=async(req,res)=>{
     try {
       const {userId}=req.query;
@@ -298,4 +372,4 @@ const createActivityLog = async (req, res) => {
       return res.status(400).json({success:false,message:"Error in getting logs by id"})
     }
   }
-  module.exports={createLog,getLogByDate,getAllLogs,createActivityLog,getLogsById}
+  module.exports={getLogByDate,getAllLogs,createActivityLog,getLogsById,createLog}

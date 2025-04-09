@@ -129,9 +129,10 @@
                                 <input type="text" placeholder="Serving" [(ngModel)]="foodData.portion"/>
                             </div>
                             <div class="input-field input-field-btn btn-set--center">
-                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-   <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="onSaveFood()">Save</button>
-                            </div>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="submitLog('food')">Save</button>
+                              </div>
+                                                       
                         </div>
                         <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
                             <div class="input-field">
@@ -140,12 +141,13 @@
                             </div>
                             <div class="input-field">
                                 <label>Activity Name</label>
-                                <select class="selectbox" [(ngModel)]="activityData.activityId" (change)="onAcitivityChange()">
+                                <select class="selectbox" [(ngModel)]="activityData.activityId" (change)="onActivityChange()">
                                   <option *ngFor="let activity of activityList" [value]="activity._id">
                                     {{ activity.activityName }}
                                   </option>
                                 </select>
                               </div>
+                              
                               
                             <div class="input-field">
                                 <label>Activity Description</label>
@@ -161,15 +163,15 @@
                             </div>
                             <div class="input-field input-field-btn btn-set--center">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" (click)="onSaveActivity()">Save</button>
+                                <button type="button" class="btn btn-primary" (click)="submitLog('activity')">Save</button>
                             </div>
+                            
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <router-outlet />
     <!-- Modal Box End -->
 </body>
 </html>

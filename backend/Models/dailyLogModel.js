@@ -40,7 +40,7 @@ const dailyLogSchema = new mongoose.Schema({
       },
       caloriesOut: {
         type: Number,
-        required: true
+        // required: true
       }
     }
   ],

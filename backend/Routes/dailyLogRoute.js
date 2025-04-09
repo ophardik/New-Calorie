@@ -1,5 +1,5 @@
 const express=require("express");
-const { createLog, getLogByDate,getAllLogs, createActivityLog,getLogsById } = require("../Controllers/dailyLogController");
+const {createLog, getLogByDate,getAllLogs, createActivityLog,getLogsById } = require("../Controllers/dailyLogController");
 const router=express();
 
 router.post("/addLog",createLog)
