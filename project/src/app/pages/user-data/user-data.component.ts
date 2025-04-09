@@ -1,69 +1,28 @@
-// import { Component } from '@angular/core';
-// import { UserDetailService } from '../../services/user-detail.service';
-// import { ActivatedRoute } from '@angular/router';
-// import { CommonModule } from '@angular/common';
-// import { FormsModule } from '@angular/forms';
-// import { UserService } from '../../services/user.service';
-// import { DailyLogService } from '../../services/daily-log.service';
-
-// @Component({
-//   selector: 'app-user-data',
-//   standalone:true,
-//   imports: [CommonModule,FormsModule],
-//   templateUrl: './user-data.component.html',
-//   styleUrl: './user-data.component.css'
-// })
-// export class UserDataComponent {
-  
-//   user:any={}
-//   allLogs:any=[]
-//   userId:string | null=null
-//   constructor(private route:ActivatedRoute ,private userDetailService:UserDetailService,dailyLogService:DailyLogService){}
-
-
-//   ngOnInit(): void {
-//     this.userId = this.route.snapshot.paramMap.get('id') || localStorage.getItem("userId");
-
-//     if(this.dailyLogService.allDailyLog(this.userId).subscribe(res=>{this.allLogs=res}))
-
-//     if (this.userId) {
-//       this.userDetailService.getSingleUser(this.userId).subscribe({
-//         next: (res: any) => {
-//           this.user = res.user;
-//           console.log("Fetched user:", this.user);
-//         },
-//         error: (err) => {
-//           console.log("Error fetching user", err);
-//         }
-//       });
-//     }
-   
-//   }
-  
-
-// }
-
-
-
 import { Component, OnInit } from '@angular/core';
 import { UserDetailService } from '../../services/user-detail.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DailyLogService } from '../../services/daily-log.service';
+import { UserSpecificComponent } from '../user-specific/user-specific.component';
 
 @Component({
   selector: 'app-user-data',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,RouterLink],
   templateUrl: './user-data.component.html',
   styleUrl: './user-data.component.css'
 })
-export class UserDataComponent implements OnInit {
 
+
+export class UserDataComponent implements OnInit {
+  selectedUserId: string = '';
   user: any = {};
   allLogs: any[] = [];
+  filteredLogs: any[] = [];  // ✅ to control what's shown in table
   userId: string | null = null;
+  selectedDate: string = '';
+  fetchedLog: any = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -73,31 +32,31 @@ export class UserDataComponent implements OnInit {
 
   ngOnInit(): void {
     this.userId = this.route.snapshot.paramMap.get('id');
-   console.log("userId",this.userId)
     if (this.userId) {
-      // Get all logs for the user
       this.dailyLogService.allDailyLog(this.userId).subscribe({
         next: (res: any) => {
           this.allLogs = res.data || [];
-          console.log("Fetched all logs:", this.allLogs);
-          console.log("Fetched all logs:", this.allLogs);
+          console.log()
+          this.filteredLogs = [...this.allLogs]; // ✅ show all initially
         },
         error: (err) => {
           console.error("Error fetching logs:", err);
         }
       });
-
-      // Get user details
-      // this.userDetailService.getSingleUser(this.userId).subscribe({
-      //   next: (res: any) => {
-      //     this.user = res.user;
-      //     console.log("Fetched user:", this.user);
-      //   },
-      //   error: (err) => {
-      //     console.log("Error fetching user", err);
-      //   }
-      // });
     }
   }
-}
 
+  fetchLogByDate() {
+    if (!this.selectedDate) {
+      this.filteredLogs = [...this.allLogs]; // ✅ reset to all logs
+      return;
+    }
+
+    const filtered = this.allLogs.filter((log) => {
+      const logDate = new Date(log.date).toISOString().split('T')[0];
+      return logDate === this.selectedDate;
+    });
+
+    this.filteredLogs = filtered;
+  }
+}

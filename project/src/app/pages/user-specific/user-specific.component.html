@@ -3,12 +3,11 @@
 
 <head>
     <meta charset="utf-8">
-        <title>Calorie Tracker Coding Assignment - User Data</title>
-
     <!-- <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+    <title>Calorie Tracker Coding Assignment - User Data Details</title>
+    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap"
         rel="stylesheet">
@@ -27,81 +26,107 @@
             </div>
         </header>
         <div class="mid-container">
-            <div class="container user-all-date-data">
-                <div class="title-row" *ngIf="user">
-                    <h1 class="title">{{ user.name }}</h1>
+            <div class="container">
+                <div class="title-row">
+                    <h1 class="title">James</h1>
                     <div class="title-row-right">
-                      <button class="btn-primary" data-toggle="modal" data-target="#addDataModal">Add Data</button>
+                        <button class="btn-primary" data-toggle="modal" data-target="#addDataModal">Add Data</button>
                     </div>
-                  </div>
-                  
-                  <input
-  type="date"
-  [(ngModel)]="selectedDate"
-  (change)="fetchLogByDate()"
-/>
-
-<div class="user-list">
-  <div class="white-card">
-    <h2>All Data</h2>
-    <table class="dcf-table dcf-table-responsive dcf-table-bordered dcf-table-striped dcf-w-100%">
-      <thead>
-        <tr>
-          <th scope="col">Date</th>
-          <th scope="col">BMR</th>
-          <th scope="col">Calorie In</th>
-          <th scope="col">Calorie Out</th>
-          <th scope="col">Net Calorie</th>
-          <th scope="col">Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- <tr *ngFor="let log of filteredLogs">
-          <th scope="row">{{ log.date | date: 'yyyy-MM-dd' }}</th>
-          <td data-label="BMR">{{ log.bmr }}</td>
-          <td data-label="Calorie In">{{ log.totalCaloriesIn }}</td>
-          <td data-label="Calorie Out">{{ log.totalCaloriesOut }}</td>
-          <td data-label="Net Calorie">{{ log.netCalories }}</td>
-          <td data-label="Action">
-            <div class="btn-set">
-              <a class="btn-secondary" [routerLink]="['/user-data', log._id]">View</a>
-            </div>
-          </td>
-        </tr> --><tr *ngFor="let log of filteredLogs">
-  <th scope="row">{{ log.date | date: 'yyyy-MM-dd' }}</th>
-
-  <td data-label="BMR">
-    {{ log.bmr !== undefined ? log.bmr : 0 }}
-  </td>
-
-  <td data-label="Calorie In">
-    {{ log.totalCaloriesIn !== undefined ? log.totalCaloriesIn : 0 }}
-  </td>
-
-  <td data-label="Calorie Out">
-    {{ log.totalCaloriesOut !== undefined ? log.totalCaloriesOut : 0 }}
-  </td>
-
-  <td data-label="Net Calorie">
-    {{ log.netCalories !== undefined ? log.netCalories : 0 }}
-  </td>
-
-  <td data-label="Action">
-    <div class="btn-set">
-      <a class="btn-secondary" [routerLink]="['/user-data', log._id]">View</a>
-    </div>
-  </td>
-</tr>
-
-        <tr *ngIf="filteredLogs.length === 0">
-          <td colspan="6" class="text-center">No data found for selected date.</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-                
+                </div>
+                <div class="view-calorie-data">
+                    <div class="view-calorie-data-date-input">
+                        <div class="date-input">
+                            <input type="date" placeholder="Age">
+                        </div>
+                        <div class="show-selected-date">
+                            Date : - 6/27/2022
+                        </div>
+                    </div>
+                    <div class="view-calorie-data-chart">
+                        <div class="food-data white-card">
+                            <h2>Food Data</h2>
+                            <div class="food-data-table">
+                                <table
+                                    class="dcf-table dcf-table-responsive dcf-table-bordered dcf-table-striped dcf-w-100%">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Meal Type</th>
+                                            <th scope="col">Food Group</th>
+                                            <th scope="col">Serving</th>
+                                            <th sope="col">Calorie In</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                          <tr *ngFor="let food of logData?.foodLog">
+                                            <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
+                                            <td>{{ food.foodId?.name }}</td>   <!-- ✅ Populated food object -->
+                                            <td>{{ food.mealType }}</td>
+                                            <td>{{ food.serving }}</td>
+                                            <td>{{ food.calories }}</td>
+                                          </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="activity-data white-card">
+                            <h2>Activity Data</h2>
+                            <div class="activity-data-table">
+                                <table
+                                    class="dcf-table dcf-table-responsive dcf-table-bordered dcf-table-striped dcf-w-100%">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Date</th>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Description</th>
+                                            <th scope="col">MET Value</th>
+                                            <th scope="col">Duration</th>
+                                            <th scope="col">Calorie Out</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let activity of logData?.activityLog">
+                                            <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
+                                            <td>{{ activity.activityId?.acitivityName }}</td>
+                                            <td>{{ activity.activityId?.specificMotion }}</td>
+                                            <td>{{ activity.duration }}</td>
+                                            <td>{{ activity.caloriesOut }}</td>
+                                          </tr>
+                                          <tr *ngFor="let activity of logData?.activityLog">
+                                            <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
+                                            <td>{{ activity.activityId?.acitivityName }}</td>
+                                            <td>{{ activity.activityId?.specificMotion }}</td>
+                                            <td>{{ activity.duration }}</td>
+                                            <td>{{ activity.caloriesOut }}</td>
+                                          </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="net-calorie-data white-card">
+                            <h2>Net Calorie</h2>
+                            <div class="net-calorie-table">
+                                <div class="net-calorie-row">
+                                    <strong>BMR: </strong>
+                                    <span>{{ logData?.bmr }}</span>
+                                </div>
+                               
+                                <div class="net-calorie-row">
+                                    <strong>Food: </strong>
+                                    <span>{{ logData?.totalCaloriesIn }}</span>
+                                </div>
+                                <div class="net-calorie-row">
+                                    <strong>Activity: </strong>
+                                    <span>-{{ logData?.totalCaloriesOut}}</span>
+                                </div>
+                                <div class="net-calorie-row net-calorie-totl">
+                                    <strong>Net Calorie:</strong>
+                                    <span>{{ logData?.netCalories }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <footer class="footer">
@@ -133,7 +158,6 @@
                                 <label>Select Date</label>
                                 <input type="date" value="06/24/2022" placeholder="Age">
                             </div>
-
                             <div class="input-field">
                                 <label>Select Food Name</label>
                                 <select class="selectbox">
@@ -151,7 +175,6 @@
                                     <option>Dinner</option>
                                 </select>
                             </div>
-
                             <div class="input-field">
                                 <label>Select Food Group</label>
                                 <select class="selectbox">
@@ -163,7 +186,7 @@
                             </div>
                             <div class="input-field">
                                 <label>Serving</label>
-                                <input type="text" placeholder="Serving" />
+                                <input type="text" placeholder="Serving">
                             </div>
                             <div class="input-field input-field-btn btn-set--center">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
