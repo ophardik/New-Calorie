@@ -249,7 +249,8 @@ export class UserListComponent {
   users: any[] = [];
   foodList: any[] = [];
   activityList: any[] = [];
-
+  visibleFoodList: any[] = [];
+  itemsToShow = 100;
   selectedUserId: string = '';
   currentPage: number = 1;
   limit: number = 10;
@@ -288,8 +289,17 @@ export class UserListComponent {
     private FoodListService: FoodListService,
     private DailyLogService: DailyLogService
   ) {}
-
+  loadVisibleFoods() {
+    this.visibleFoodList = this.foodList.slice(0, this.itemsToShow);
+    console.log("this.visibleFoodList")
+  }
+  
+  loadMoreFoods() {
+    this.itemsToShow += 100;
+    this.loadVisibleFoods();
+  }
   ngOnInit() {
+    this.loadVisibleFoods();
     this.getAllUsers();
 
     this.FoodListService.getAllFood().subscribe({
@@ -394,39 +404,56 @@ export class UserListComponent {
       error: (err) => console.log('error adding activity', err),
     });
   }
-
-  submitLog(type: string) {
+  submitLog(type: 'food' | 'activity') {
+    if (!this.selectedUserId) return alert("Please select a user");
+  
+    const date = type === 'food' ? this.foodData.date : this.activityData.date;
+  
     const payload: any = {
       userId: this.selectedUserId,
-      date: type === 'food' ? this.foodData.date : this.activityData.date,
+      date
     };
-
+  
+    const selectedUser = this.users.find(u => u.id === this.selectedUserId);
+  
+  
     if (type === 'food') {
-      payload.foodLog = [{
-        foodId: this.foodData.foodId,
-        portion: this.foodData.portion,
-        time: this.foodData.time,
-      }];
-    } else if (type === 'activity') {
-      payload.activityLog = [{
-        activityName: this.activityData.activityName,
-        duration: this.activityData.duration,
-        caloriesOut: this.activityData.caloriesOut,
-        METvalue: this.activityData.METvalue,
-        description: this.activityData.description,
-      }];
-    }
-
-    this.DailyLogService.createOrUpdateDailyLog(payload).subscribe({
-      next: (res: any) => {
-        alert(`${type} log saved successfully`);
-      },
-      error: (err: any) => {
-        console.error("Error submitting log", err);
+      const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
+      if (selectedFood) {
+        this.foodData.foodName = selectedFood.foodName;
       }
+  
+      payload.foodLog = [this.foodData];
+      
+    }
+  
+    if (type === 'activity') {
+      const weight = selectedUser?.weight || 70;
+  
+      const [hrs, mins] = (this.activityData.duration || '0:0').split(':').map(Number);
+      const durationInHours = hrs + (mins / 60);
+      const caloriesOut = this.activityData.METvalue * weight * durationInHours;
+  
+      this.activityData.caloriesOut = caloriesOut;
+      this.activityData.description = this.activityData.description || '';
+
+      payload.activityLog = [this.activityData];
+    }
+  
+    this.DailyLogService.createOrUpdateDailyLog(payload).subscribe({
+      next: (res) => {
+        console.log(`${type} log added`, res);
+        alert(`${type === 'food' ? 'Food' : 'Activity'} added successfully`);
+        
+        if (type === 'food') {
+          this.foodData = {};
+        } else if (type === 'activity') {
+          this.activityData = {};
+        }
+      },
+      error: (err) => console.error(`Error adding ${type}`, err)
     });
   }
-
   getCaloriesOut(): number {
     const selectedUser = this.users.find(user => user._id === this.activityData.userId);
     const weight = selectedUser?.weight || 0;

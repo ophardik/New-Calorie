@@ -1,0 +1,33 @@
+@REM .selectbox {
+@REM   width: 100%;
+@REM   max-height: 300px;
+@REM   overflow-y: auto;
+@REM   border: 1px solid #ccc;
+@REM   border-radius: 4px;
+@REM   padding: 8px;
+@REM }
+
+@REM .loading-option {
+@REM   color: #666;
+@REM   font-style: italic;
+@REM   text-align: center;
+@REM   background-color: #f5f5f5;
+@REM }
+
+@REM /* Improve scrollbar appearance */
+@REM .selectbox::-webkit-scrollbar {
+@REM   width: 8px;
+@REM }
+
+@REM .selectbox::-webkit-scrollbar-track {
+@REM   background: #f1f1f1;
+@REM }
+
+@REM .selectbox::-webkit-scrollbar-thumb {
+@REM   background: #888;
+@REM   border-radius: 4px;
+@REM }
+
+@REM .selectbox::-webkit-scrollbar-thumb:hover {
+@REM   background: #555;
+@REM }
