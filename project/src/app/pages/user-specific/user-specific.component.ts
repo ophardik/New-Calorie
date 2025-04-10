@@ -7,24 +7,59 @@ import { CommonModule } from '@angular/common';
   selector: 'app-user-specific',
   imports: [CommonModule],
    templateUrl: './user-specific.component.html',
-  styleUrls: ['./user-specific.component.css']  // ✅ Fix: it's `styleUrls` (plural), not `styleUrl`
+  styleUrls: ['./user-specific.component.css']  
 })
-export class UserSpecificComponent implements OnInit {  // ✅ Fix: implement OnInit to use ngOnInit
+export class UserSpecificComponent implements OnInit {  
 
   logData: any;
+  userName: any;
 
-  constructor(  // ✅ Fix: typo — should be `constructor` not `contructor`
+  constructor( 
     private route: ActivatedRoute,
     private dailyLogService: DailyLogService
   ) {}
 
+  // ngOnInit(): void {
+  //   const id = this.route.snapshot.paramMap.get('id');
+  
+  //   if (id) {
+  //     this.dailyLogService.getLogById(id).subscribe({
+  //       next: (res: any) => {
+  //         this.logData = res.data;  
+  //         console.log(res.data,"res.data")
+  //         const userId=res.data.userId;
+  //         console.log(userId,"userId")
+  //         this.dailyLogService.getUserById(userId).subscribe({
+            
+  //         })
+  //       },
+  //       error: (err) => {
+  //         console.error('Failed to fetch log data:', err);
+  //       }
+  //     });
+  //   }
+  // }
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
   
     if (id) {
       this.dailyLogService.getLogById(id).subscribe({
         next: (res: any) => {
-          this.logData = res.data;  // ✅ Since your API returns { success, data }
+          this.logData = res.data;
+          console.log(res.data, "res.data");
+  
+          const userId = res.data.userId;
+          console.log(userId, "userId");
+  
+          this.dailyLogService.getUserById(userId).subscribe({
+            next: (userRes: any) => {
+              console.log(userRes, "User data");
+              this.userName = userRes.data.name; // Access the user's name here
+            },
+            error: (err) => {
+              console.error('Failed to fetch user data:', err);
+            }
+          });
         },
         error: (err) => {
           console.error('Failed to fetch log data:', err);

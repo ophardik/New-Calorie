@@ -21,10 +21,7 @@ const dailyLogSchema = new mongoose.Schema({
         type: Number,
         required: true
       },
-      // time: {
-      //   type: String, // e.g., breakfast, lunch
-      //   required: true
-      // }
+
     }
   ],
   activityLog: [
@@ -35,12 +32,14 @@ const dailyLogSchema = new mongoose.Schema({
         required: true
       },
       duration: {
-        type: String, // in minutes
+        type: String, 
         required: true
       },
       caloriesOut: {
         type: Number,
-        // required: true
+      },
+      description: {
+        type: String,
       }
     }
   ],

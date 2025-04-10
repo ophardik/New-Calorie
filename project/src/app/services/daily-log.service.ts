@@ -25,4 +25,8 @@ export class DailyLogService {
   getLogById(id:string):Observable<any>{
     return this.http.get(`${this.baseUrl}/getLogs/${id}`)
   }
+  getUserById(id: string): Observable<any> {
+    return this.http.post(`${this.baseUrl}/getUser`, { userId: id });
+  }
+  
 }

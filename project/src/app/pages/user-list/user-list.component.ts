@@ -71,7 +71,7 @@
   
 //     console.log("📤 Sending payload:", payload);
   
-//     this.DailyLogService.createLog(payload).subscribe({
+//     this.DailyLogService.createOrUpdateDailyLog(payload).subscribe({
 //       next: (res: any) => {
 //         console.log("✅ Log created successfully", res);
 //         alert("Log created successfully");
@@ -226,6 +226,8 @@
 //  }  
  
 // }
+
+
 import { Component } from '@angular/core';
 import { UserDetailService } from '../../services/user-detail.service';
 import { CommonModule } from '@angular/common';
@@ -239,79 +241,111 @@ import { DailyLogService } from '../../services/daily-log.service';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule,RouterLink,  FormsModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './user-list.component.html',
-  styleUrls: ['./user-list.component.css']
+  styleUrl: './user-list.component.css',
 })
 export class UserListComponent {
   users: any[] = [];
-  selectedUserId: string = '';
-
   foodList: any[] = [];
   activityList: any[] = [];
 
+  selectedUserId: string = '';
+  currentPage: number = 1;
+  limit: number = 10;
+
   foodData: any = {
-    foodId: "",
-    foodName: "",
-    mealType: "",
-    portion: "",
-    foodGroup: "",
-    date: "",
-    time: ""
+    userId: '',
+    foodId: '',
+    foodName: '',
+    mealType: '',
+    portion: '',
+    foodGroup: '',
+    date: '',
+    time: ''
   };
 
   activityData: any = {
+    userId: '',
     activityId: '',
     activityName: '',
     date: '',
     duration: '',
     description: '',
-    METvalue: ''
+    METvalue: '',
+    caloriesOut: 0
   };
 
-  uniqueFoodGroups: string[] = [];
-  uniqueActivityGroups: string[] = [];
+  uniqueFoodGroups: any;
+  uniqueActivityGroups: any;
+
+  isMoreFoodAvailable: boolean = false;
 
   constructor(
     private userDetailService: UserDetailService,
-    private foodService: FoodService,
-    private activityService: ActivityService,
-    private foodListService: FoodListService,
-    private dailyLogService: DailyLogService
+    private FoodService: FoodService,
+    private AcitivityService: ActivityService,
+    private FoodListService: FoodListService,
+    private DailyLogService: DailyLogService
   ) {}
 
   ngOnInit() {
-    this.userDetailService.getAllUsers().subscribe({
-      next: (res: any) => this.users = res?.users || [],
-      error: (err) => console.error("error fetching users", err)
-    });
+    this.getAllUsers();
 
-    this.foodListService.getAllFood().subscribe({
+    this.FoodListService.getAllFood().subscribe({
       next: (res: any) => {
-        this.foodList = res.data || [];
-        this.uniqueFoodGroups = Array.from(new Set(this.foodList.map(f => f.foodGroup).filter(Boolean)));
-      },
-      error: (err) => console.error("error fetching foodList", err)
-    });
-
-    this.activityService.getAllActivity().subscribe({
-      next: (res: any) => {
-        const activities = res.data || [];
-        const uniqueMap = new Map();
-        activities.forEach((a: any) => {
-          const name = a.activityName || a.acitivityName;
-          if (!uniqueMap.has(name)) uniqueMap.set(name, { ...a, activityName: name });
+        const allFoods = res.data || [];
+        this.foodList = allFoods;
+        const foodGroupSet = new Set<string>();
+        allFoods.forEach((food: { foodGroup: string }) => {
+          if (food.foodGroup) {
+            foodGroupSet.add(food.foodGroup);
+          }
         });
-        this.activityList = Array.from(uniqueMap.values());
-        this.uniqueActivityGroups = Array.from(new Set(this.activityList.map(a => a.activityGroup).filter(Boolean)));
+        this.uniqueFoodGroups = Array.from(foodGroupSet);
       },
-      error: (err) => console.error("error fetching activityList", err)
+      error: (err) => console.log('error fetching foodList', err),
+    });
+
+    this.AcitivityService.getAllActivity().subscribe({
+      next: (res: any) => {
+        const allActivity = res.data || [];
+        const uniqueActivityMap = new Map<string, any>();
+        allActivity.forEach((activity: any) => {
+          const activityName = activity.activityName || activity.acitivityName;
+          if (!uniqueActivityMap.has(activityName)) {
+            uniqueActivityMap.set(activityName, { ...activity, activityName });
+          }
+        });
+
+        this.activityList = Array.from(uniqueActivityMap.values());
+
+        const activityGroupSet = new Set<string>();
+        this.activityList.forEach((activity: any) => {
+          if (activity.activityGroup) {
+            activityGroupSet.add(activity.activityGroup);
+          }
+        });
+        this.uniqueActivityGroups = Array.from(activityGroupSet);
+      },
+      error: (err) => console.log('error fetching activityList', err),
+    });
+  }
+
+  getAllUsers() {
+    this.userDetailService.getAllUsers().subscribe({
+      next: (res: any) => {
+        this.users = res?.users || [];
+        this.isMoreFoodAvailable = res?.users?.length === this.limit;
+      },
+      error: (err) => console.log('error fetching users', err),
     });
   }
 
   onSelectUser(user: any) {
     this.selectedUserId = user.id;
-    console.log("Selected User ID:", this.selectedUserId);
+    this.foodData.userId = user.id;
+    this.activityData.userId = user.id;
   }
 
   onFoodChange() {
@@ -322,101 +356,84 @@ export class UserListComponent {
   }
 
   onActivityChange() {
-    const selectedActivity = this.activityList.find(a => a._id === this.activityData.activityId);
+    const selectedActivity = this.activityList.find(
+      (a: any) => a._id === this.activityData.activityId
+    );
     if (selectedActivity) {
       this.activityData.activityName = selectedActivity.activityName;
       this.activityData.METvalue = selectedActivity.METs;
     }
   }
 
-  // submitLog(type: 'food' | 'activity') {
-  //   if (!this.selectedUserId) return alert("Please select a user");
-  
-  //   const date = type === 'food' ? this.foodData.date : this.activityData.date;
-  
-  //   const payload: any = {
-  //     userId: this.selectedUserId,
-  //     date
-  //   };
-  
-  //   if (type === 'food') {
-  //     const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
-  //     if (selectedFood) {
-  //       this.foodData.foodName = selectedFood.foodName;
-  //     }
-  
-  //     payload.foodLog = [this.foodData];
-  //   }
-  
-  //   if (type === 'activity') {
-  //     const selectedUser = this.users.find(u => u.id === this.selectedUserId);
-  //     const weight = selectedUser?.weight || 70;
-  
-  //     const [hrs, mins] = (this.activityData.duration || '0:0').split(':').map(Number);
-  //     const durationInHours = hrs + (mins / 60);
-  //     const caloriesOut = this.activityData.METvalue * weight * durationInHours;
-  
-  //     this.activityData.caloriesOut = caloriesOut;
-  
-  //     payload.activityLog = [this.activityData];
-  //   }
-  
-  //   this.dailyLogService.createOrUpdateDailyLog(payload).subscribe({
-  //     next: (res) => {
-  //       console.log(`${type} log added`, res);
-  //       alert(`${type === 'food' ? 'Food' : 'Activity'} added successfully`);
-  //     },
-  //     error: (err) => console.error(`Error adding ${type}`, err)
-  //   });
-  // }
-
-  submitLog(type: 'food' | 'activity') {
-    if (!this.selectedUserId) return alert("Please select a user");
-  
-    const date = type === 'food' ? this.foodData.date : this.activityData.date;
-  
-    const payload: any = {
-      userId: this.selectedUserId,
-      date
-    };
-  
-    const selectedUser = this.users.find(u => u.id === this.selectedUserId);
-    // if (selectedUser) {
-    //   payload.bmr = this.calculateBMR(selectedUser); // ✅ Add BMR to payload
-    // }
-  
-    if (type === 'food') {
-      const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
-      if (selectedFood) {
-        this.foodData.foodName = selectedFood.foodName;
-      }
-  
-      payload.foodLog = [this.foodData];
-    }
-  
-    if (type === 'activity') {
-      const weight = selectedUser?.weight || 70;
-  
-      const [hrs, mins] = (this.activityData.duration || '0:0').split(':').map(Number);
-      const durationInHours = hrs + (mins / 60);
-      const caloriesOut = this.activityData.METvalue * weight * durationInHours;
-  
-      this.activityData.caloriesOut = caloriesOut;
-  
-      payload.activityLog = [this.activityData];
-    }
-  
-    this.dailyLogService.createOrUpdateDailyLog(payload).subscribe({
+  onSaveFood() {
+    this.foodData.userId = this.selectedUserId;
+    this.FoodService.addFood(this.foodData).subscribe({
       next: (res) => {
-        console.log(`${type} log added`, res);
-        alert(`${type === 'food' ? 'Food' : 'Activity'} added successfully`);
+        alert('Food added');
+        this.submitLog('food');
       },
-      error: (err) => console.error(`Error adding ${type}`, err)
+      error: (err) => console.log('error adding food', err),
     });
   }
-  
- 
-  
-  
-  
+
+  onSaveActivity() {
+    const selectedUser = this.users.find(user => user.id === this.activityData.userId);
+    const weight = selectedUser?.weight || 0;
+
+    const [hours, minutes] = this.activityData.duration.split(':').map(Number);
+    const durationInHours = hours + (minutes / 60);
+    const caloriesOut = this.activityData.METvalue * weight * durationInHours;
+
+    this.activityData.caloriesOut = caloriesOut;
+
+    this.AcitivityService.addActivity(this.activityData).subscribe({
+      next: (res) => {
+        alert('Activity added');
+        this.submitLog('activity');
+      },
+      error: (err) => console.log('error adding activity', err),
+    });
+  }
+
+  submitLog(type: string) {
+    const payload: any = {
+      userId: this.selectedUserId,
+      date: type === 'food' ? this.foodData.date : this.activityData.date,
+    };
+
+    if (type === 'food') {
+      payload.foodLog = [{
+        foodId: this.foodData.foodId,
+        portion: this.foodData.portion,
+        time: this.foodData.time,
+      }];
+    } else if (type === 'activity') {
+      payload.activityLog = [{
+        activityName: this.activityData.activityName,
+        duration: this.activityData.duration,
+        caloriesOut: this.activityData.caloriesOut,
+        METvalue: this.activityData.METvalue,
+        description: this.activityData.description,
+      }];
+    }
+
+    this.DailyLogService.createOrUpdateDailyLog(payload).subscribe({
+      next: (res: any) => {
+        alert(`${type} log saved successfully`);
+      },
+      error: (err: any) => {
+        console.error("Error submitting log", err);
+      }
+    });
+  }
+
+  getCaloriesOut(): number {
+    const selectedUser = this.users.find(user => user._id === this.activityData.userId);
+    const weight = selectedUser?.weight || 0;
+
+    const [hours, minutes] = (this.activityData.duration || '0:0').split(':').map(Number);
+    const durationInHours = hours + (minutes / 60);
+
+    return this.activityData.METvalue * weight * durationInHours;
+  }
 }

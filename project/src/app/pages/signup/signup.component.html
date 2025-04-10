@@ -2,14 +2,6 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <!-- <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-        <title>Calorie Tracker Coding Assignment - Sign up</title>
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
-        <link href="assets/css/global.css" rel="stylesheet"> -->
     </head>
     <body>
         <div>
@@ -17,9 +9,15 @@
                 <div class="container">
                     <div class="logo">
                         <a href="#">
-                            <img src="assets/img/logo.png">
+                            <img src="../assets/img/logo.png">
                         </a>
                     </div>
+                    <div style="position: absolute; right: 20px; top: 10%; transform: translateY(-50%);">
+      <a [routerLink]="['/user-list']">
+        <button class="btn-primary">User List</button>
+      </a>
+    </div>
+
                 </div>
             </header>
             <div class="mid-container">
@@ -36,11 +34,11 @@
                                 <input type="text" placeholder="Email" [(ngModel)]="user.email" email="email" />
                             </div>
                             <div class="input-field">
-                                <label>Weight</label>
+                                <label>Weight (kg)</label>
                                 <input type="text" placeholder="Weight" [(ngModel)]="user.weight" weight="weight" />
                             </div>
                             <div class="input-field">
-                                <label>Height</label>
+                                <label>Height (cm)</label>
                                 <input type="text" placeholder="Height"[(ngModel)]="user.height" height="height" />
                             </div>
                             <div class="input-field">
@@ -69,8 +67,5 @@
             </footer>
         </div>
     </body>
-    <!-- <script src="assets/js/jquery.slim.min.js"></script>
-<script src="assets/js/popper.min.js"></script>
-<script src="assets/js/bootstrap.min.js"></script>
-<script src="assets/js/custom.js"></script> -->
+
 </html>

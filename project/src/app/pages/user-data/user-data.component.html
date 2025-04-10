@@ -5,14 +5,7 @@
     <meta charset="utf-8">
         <title>Calorie Tracker Coding Assignment - User Data</title>
 
-    <!-- <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="assets/css/global.css" rel="stylesheet"> -->
+  
 </head>
 
 <body>
@@ -31,7 +24,8 @@
                 <div class="title-row" *ngIf="user">
                     <h1 class="title">{{ user.name }}</h1>
                     <div class="title-row-right">
-                      <button class="btn-primary" data-toggle="modal" data-target="#addDataModal">Add Data</button>
+                      <button class="btn-primary" data-toggle="modal" data-target="#addDataModal"   (click)="onSelectUser(user)" >
+                        Add Data</button>
                     </div>
                   </div>
                   
@@ -56,18 +50,7 @@
         </tr>
       </thead>
       <tbody>
-        <!-- <tr *ngFor="let log of filteredLogs">
-          <th scope="row">{{ log.date | date: 'yyyy-MM-dd' }}</th>
-          <td data-label="BMR">{{ log.bmr }}</td>
-          <td data-label="Calorie In">{{ log.totalCaloriesIn }}</td>
-          <td data-label="Calorie Out">{{ log.totalCaloriesOut }}</td>
-          <td data-label="Net Calorie">{{ log.netCalories }}</td>
-          <td data-label="Action">
-            <div class="btn-set">
-              <a class="btn-secondary" [routerLink]="['/user-data', log._id]">View</a>
-            </div>
-          </td>
-        </tr> --><tr *ngFor="let log of filteredLogs">
+        <tr *ngFor="let log of filteredLogs">
   <th scope="row">{{ log.date | date: 'yyyy-MM-dd' }}</th>
 
   <td data-label="BMR">
@@ -88,7 +71,7 @@
 
   <td data-label="Action">
     <div class="btn-set">
-      <a class="btn-secondary" [routerLink]="['/user-data', log._id]">View</a>
+      <a class="btn-secondary" [routerLink]="['/user-specific', log._id]">View</a>
     </div>
   </td>
 </tr>
@@ -131,21 +114,20 @@
                         <div class="tab-pane fade show active" id="food" role="tabpanel" aria-labelledby="food-tab">
                             <div class="input-field">
                                 <label>Select Date</label>
-                                <input type="date" value="06/24/2022" placeholder="Age">
+                                <input type="date" [(ngModel)]="foodData.date">
                             </div>
 
                             <div class="input-field">
                                 <label>Select Food Name</label>
-                                <select class="selectbox">
-                                    <option>Beans</option>
-                                    <option>Vegetable</option>
-                                    <option>Fast Food</option>
-                                    <option>fruits</option>
+                                <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()">
+                                    <option *ngFor="let food of foodList" [value]="food._id">
+                                        {{ food.foodName }}
+                                      </option>
                                 </select>
                             </div>
                             <div class="input-field">
                                 <label>Select Meal Type</label>
-                                <select class="selectbox">
+                                <select class="selectbox" [(ngModel)]="foodData.mealType">
                                     <option>Breakfast</option>
                                     <option>Lunch</option>
                                     <option>Dinner</option>
@@ -154,50 +136,49 @@
 
                             <div class="input-field">
                                 <label>Select Food Group</label>
-                                <select class="selectbox">
-                                    <option>Beans</option>
-                                    <option>Vegetable</option>
-                                    <option>Fast Food</option>
-                                    <option>fruits</option>
+                                <select class="selectbox" [(ngModel)]="foodData.foodGroup">
+                                    <option *ngFor="let group of uniqueFoodGroups" [value]="group">
+                                        {{ group }}
+                                      </option>
                                 </select>
                             </div>
                             <div class="input-field">
                                 <label>Serving</label>
-                                <input type="text" placeholder="Serving" />
+                                <input type="text" placeholder="Serving" [(ngModel)]="foodData.portion"/>
                             </div>
                             <div class="input-field input-field-btn btn-set--center">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
-                            </div>
+                                <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="submitLog('food')">Save</button>
+                              </div>
                         </div>
                         <div class="tab-pane fade" id="activity" role="tabpanel" aria-labelledby="activity-tab">
                             <div class="input-field">
                                 <label>Select Date</label>
-                                <input type="date" value="06/24/2022" placeholder="Age">
+                                <input type="date" [(ngModel)]="activityData.date">
                             </div>
                             <div class="input-field">
                                 <label>Activity Name</label>
-                                <select class="selectbox">
-                                    <option>Bicycling</option>
-                                    <option>Mountain</option>
-                                    <option>Racing</option>
+                                <select class="selectbox" [(ngModel)]="activityData.activityId" (change)="onActivityChange()">
+                                    <option *ngFor="let activity of activityList" [value]="activity._id">
+                                        {{ activity.activityName }}
+                                      </option>
                                 </select>
                             </div>
                             <div class="input-field">
                                 <label>Activity Description</label>
-                                <textarea placeholder="Description"></textarea>
+                                <textarea placeholder="Description" [(ngModel)]="activityData.description"></textarea>
                             </div>
                             <div class="input-field">
                                 <label>MET Value</label>
-                                <input type="text" value="" placeholder="Value">
+                                <input type="text" value="" placeholder="Value" [(ngModel)]="activityData.METvalue" disabled>
                             </div>
                             <div class="input-field">
                                 <label>Activity Duration</label>
-                                <input type="time" value="06/24/2022" placeholder="Age">
+                                <input type="time" [(ngModel)]="activityData.duration">
                             </div>
                             <div class="input-field input-field-btn btn-set--center">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                <button type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+                                <button type="button" class="btn btn-primary" (click)="submitLog('activity')">Save</button>
                             </div>
                         </div>
                     </div>
@@ -207,9 +188,6 @@
     </div>
     <!-- Modal Box End -->
 </body>
-<!-- <script src="assets/js/jquery.slim.min.js"></script>
-<script src="assets/js/popper.min.js"></script>
-<script src="assets/js/bootstrap.min.js"></script>
-<script src="assets/js/custom.js"></script> -->
+
 
 </html>

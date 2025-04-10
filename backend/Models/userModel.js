@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  age: {                       // ✅ Add this field
+  age: {                      
     type: Number,
     required: true,
   },

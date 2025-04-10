@@ -8,9 +8,9 @@ const userFoodSchema = new mongoose.Schema({
     enum: ["Breakfast", "Lunch", "Dinner"],
     required: true,
   },
-  portion: { type: Number, required: true }, // servings or grams
-  foodGroup: { type: String, required: true }, // e.g., protein, carbs, fats, etc.
-  date: { type: Date, required: true }, // stores when it was eaten
+  portion: { type: Number, required: true }, 
+  foodGroup: { type: String, required: true }, 
+  date: { type: Date, required: true },
 });
 
 const UserFood = mongoose.model("UserFood", userFoodSchema);

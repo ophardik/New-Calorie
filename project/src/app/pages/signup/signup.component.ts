@@ -2,11 +2,11 @@ import { Component } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { FormsModule } from '@angular/forms';
 import { UserListComponent } from '../user-list/user-list.component';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
-  imports: [FormsModule],
+  imports: [FormsModule,RouterLink],
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.css'
 })

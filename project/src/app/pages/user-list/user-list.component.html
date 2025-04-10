@@ -2,10 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Calorie Tracker Coding Assignment - User List</title>
     
 </head>
@@ -31,8 +28,8 @@
                         <thead>
                             <tr>
                                 <th scope="col" class="name">Name</th>
-                                <th scope="col" class="weight">Weight</th>
-                                <th scope="col" class="height">Height</th>
+                                <th scope="col" class="weight">Weight (kg)</th>
+                                <th scope="col" class="height">Height (cm)</th>
                                 <th scope="col" class="gender">Gender</th>
                                 <th scope="col" class="age">Age</th>
                                 <th scope="col" class="bmr">BMR</th>
@@ -47,7 +44,13 @@
                                 <td data-label="Height">{{user.height}}</td>
                                 <td data-label="Gender">{{user.gender}}</td>
                                 <td data-label="Age">{{user.age}}</td>
-                                <th scope="col">1535.245</th>
+                                <td data-label="BMR">
+                                    {{
+                                      user.gender === 'male'
+                                        ? (66.4730 + (13.7516 * user.weight) + (5.0033 * user.height) - (6.7550 * user.age) | number : '1.0-0')
+                                        : (655.0955 + (9.5634 * user.weight) + (1.8496 * user.height) - (4.6756 * user.age) | number : '1.0-0')
+                                    }}
+                                  </td>
                                 <td data-label="Action">
                                     <div class="btn-set">
                <a class="btn btn-secondary" [routerLink]="['/user-data', user.id]">View</a>

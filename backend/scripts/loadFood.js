@@ -6,22 +6,12 @@ const { connectToDB } = require("../config/db");
 
 dotenv.config();
 
-// DB connection
-// mongoose.connect(process.env.MONGO_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
-// })
-// .then(() => {
-//   console.log(" MongoDB connected");
-//   return insertData();
-// })
-// .catch((err) => console.error(" MongoDB connection error:", err));
+
 connectToDB();
 
-// Function to insert data
 async function insertData() {
   try {
-    const cleanedData = data .filter(item => item["Serving Description 1 (g)"]) // skip if missing
+    const cleanedData = data .filter(item => item["Serving Description 1 (g)"]) 
     .map(item => ({
       foodName: item.name,
       foodGroup: item["Food Group"],
@@ -30,7 +20,7 @@ async function insertData() {
       protein: item["Protein (g)"],
       carbs: item["Carbohydrate (g)"],
       servingSize: item["Serving Description 1 (g)"],
-    })); // Reshapes every item into the format expected by your Mongoose model.
+    })); 
   
 
     await Food.insertMany(cleanedData);

@@ -3,15 +3,9 @@
 
 <head>
     <meta charset="utf-8">
-    <!-- <link rel="icon" href="assets/img/favicon.ico" type="image/x-icon">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> -->
+
     <title>Calorie Tracker Coding Assignment - User Data Details</title>
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link href="assets/css/global.css" rel="stylesheet"> -->
+
 </head>
 
 <body>
@@ -28,9 +22,9 @@
         <div class="mid-container">
             <div class="container">
                 <div class="title-row">
-                    <h1 class="title">James</h1>
+                    <h1 class="title">{{userName}}</h1>
                     <div class="title-row-right">
-                        <button class="btn-primary" data-toggle="modal" data-target="#addDataModal">Add Data</button>
+                        <!-- <button class="btn-primary" data-toggle="modal" data-target="#addDataModal">Add Data</button> -->
                     </div>
                 </div>
                 <div class="view-calorie-data">
@@ -39,7 +33,7 @@
                             <input type="date" placeholder="Age">
                         </div>
                         <div class="show-selected-date">
-                            Date : - 6/27/2022
+                            {{ logData.date | date: 'MM/dd/yyyy' }}
                         </div>
                     </div>
                     <div class="view-calorie-data-chart">
@@ -59,12 +53,14 @@
                                     </thead>
                                     <tbody>
                                           <tr *ngFor="let food of logData?.foodLog">
-                                            <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
-                                            <td>{{ food.foodId?.name }}</td>   <!-- ✅ Populated food object -->
-                                            <td>{{ food.mealType }}</td>
-                                            <td>{{ food.serving }}</td>
-                                            <td>{{ food.calories }}</td>
-                                          </tr>
+                                              <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
+                                         <td>{{ food.foodId?.foodName }}</td>
+                                         <!-- <td>{{ food.mealType || 'N/A' }}</td>  -->
+                                          <td>{{ food.foodId?.foodGroup }}</td>
+                                         <td>{{ food.portion }}</td>
+                                         <td>{{ food.portion * food.foodId?.caloriesPerServing }}</td>
+                                       </tr>
+
                                     </tbody>
                                 </table>
                             </div>
@@ -85,20 +81,15 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr *ngFor="let activity of logData?.activityLog">
-                                            <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
-                                            <td>{{ activity.activityId?.acitivityName }}</td>
-                                            <td>{{ activity.activityId?.specificMotion }}</td>
-                                            <td>{{ activity.duration }}</td>
-                                            <td>{{ activity.caloriesOut }}</td>
-                                          </tr>
                                           <tr *ngFor="let activity of logData?.activityLog">
+                                          
                                             <td>{{ logData.date | date: 'MM/dd/yyyy' }}</td>
-                                            <td>{{ activity.activityId?.acitivityName }}</td>
-                                            <td>{{ activity.activityId?.specificMotion }}</td>
-                                            <td>{{ activity.duration }}</td>
-                                            <td>{{ activity.caloriesOut }}</td>
-                                          </tr>
+                                            <td>{{ activity.activityId?.acitivityName || 'N/A' }}</td>
+                                            <td>{{ activity.description || 'N/A' }}</td>
+                                            <td>{{ activity.activityId?.METs || 'N/A' }}</td>
+                                            <td>{{ activity.duration || 'N/A' }}</td>
+                                            <td>{{ activity.caloriesOut ?? 'Not Found' }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -113,7 +104,7 @@
                                
                                 <div class="net-calorie-row">
                                     <strong>Food: </strong>
-                                    <span>{{ logData?.totalCaloriesIn }}</span>
+                                    <span>{{ logData?.totalCaloriesIn !== undefined ? logData.totalCaloriesIn : 'N/A' }}</span>
                                 </div>
                                 <div class="net-calorie-row">
                                     <strong>Activity: </strong>
@@ -135,7 +126,7 @@
             </div>
         </footer>
     </div>
-    <!-- Modal Box Start -->
+    <!-- Modal Box Start
     <div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content add-data-modal">
@@ -227,7 +218,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- Modal Box End -->
 </body>
 <!-- <script src="assets/js/jquery.slim.min.js"></script>

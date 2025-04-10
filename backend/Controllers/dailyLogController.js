@@ -5,91 +5,6 @@ const dailyLogModel=require("../Models/dailyLogModel")
 const mongoose=require("mongoose")
 
 const createLog = async (req, res) => {
-// try {
-//   const { userId, date, foodLog = [], activityLog = [], bmr = 0 } = req.body;
-
-//   const normalizedDate = new Date(date).toISOString().split("T")[0];
-//   let log = await dailyLogModel.findOne({ userId, date: new Date(normalizedDate) });
-
-//   if (!log) {
-//     log = new dailyLogModel({
-//       userId,
-//       date: new Date(normalizedDate),
-//       foodLog: [],
-//       activityLog: [],
-//       bmr: !isNaN(bmr) ? bmr : 0,
-//     });
-//   }
-
-//   // Append new logs
-//   if (foodLog.length > 0) log.foodLog.push(...foodLog);
-//   if (activityLog.length > 0) log.activityLog.push(...activityLog);
-
-//   // Calculate totalCaloriesIn
-//   let totalCaloriesIn = 0;
-
-//   for (const item of log.foodLog) {
-//     const food = await foodModel.findById(item.foodId).lean();
-//     console.log("food", food);
-  
-//     const portion = !isNaN(item.portion) ? item.portion : 1;
-//     const calories = (food?.caloriesPerServing || 0) * portion;
-  
-//     console.log("caloriesPerServing", food?.caloriesPerServing);
-//     console.log("portion", item.portion);
-//     console.log("calculatedCalories", calories);
-  
-//     item.caloriesIn = calories;
-//     totalCaloriesIn += calories;
-//   }
-  
-//   console.log("totalCaloriesIn",totalCaloriesIn)
-
-//   // Calculate totalCaloriesOut
-//   const weightInKg = 70;
-//   let totalCaloriesOut = 0;
-
-//   for (const item of log.activityLog) {
-//     const activity = await activityModel.findById(item.activityId);
-//     let minutes = 0;
-
-//     if (item.duration) {
-//       if (item.duration.includes(":")) {
-//         const [hh, mm] = item.duration.split(":").map(Number);
-//         if (!isNaN(hh) && !isNaN(mm)) minutes = hh * 60 + mm;
-//       } else {
-//         const parsed = parseInt(item.duration);
-//         if (!isNaN(parsed)) minutes = parsed;
-//       }
-//     }
-
-//     if (activity && typeof activity.METs === "number" && minutes > 0) {
-//       const durationInHours = minutes / 60;
-//       const caloriesOut = activity.METs * weightInKg * durationInHours;
-//       item.caloriesOut = Math.round(caloriesOut);
-//       totalCaloriesOut += item.caloriesOut;
-//     } else {
-//       item.caloriesOut = 0;
-//     }
-//   }
-
-//   log.totalCaloriesIn = totalCaloriesIn;
-//   log.totalCaloriesOut = totalCaloriesOut;
-//   const safeBMR = !isNaN(log.bmr) ? log.bmr : 0;
-
-//   log.netCalories = Math.round((safeBMR + totalCaloriesIn) - totalCaloriesOut);
-
-//   await log.save();
-
-//   res.status(200).json({
-//     message: "Log created or updated successfully",
-//     log,
-//   });
-
-// } catch (err) {
-//   console.error("Error in createOrUpdateDailyLog:", err);
-//   res.status(500).json({ error: err.message });
-// };
   
 try {
   const { userId, date, foodLog = [], activityLog = [] } = req.body;
@@ -169,6 +84,9 @@ try {
     } else {
       item.caloriesOut = 0;
     }
+    if (!item.description && activity?.description) {
+      item.description = activity.description; 
+    }
   }
 
   log.totalCaloriesIn = totalCaloriesIn;
@@ -193,56 +111,6 @@ try {
 
 }
 
-
-
-// const createActivityLog = async (req, res) => {
-//   try {
-//     const { userId, activityId, duration, date } = req.body;
-
-//     if (!userId || !activityId || !duration || !date) {
-//       return res.status(400).json({ message: "Missing required fields." });
-//     }
-
-//     // Fetch user to get weight
-//     const user = await userModel.findById(userId);
-//     if (!user || !user.weight) {
-//       return res.status(404).json({ message: "User or weight not found." });
-//     }
-
-//     // Fetch activity to get MET value
-//     const activity = await activityModel.findById(activityId);
-//     if (!activity || !activity.METs) {
-//       return res.status(404).json({ message: "Activity or METs not found." });
-//     }
-
-//     // Convert duration from "hh:mm" to decimal hours
-//     const [hours, minutes] = duration.split(':').map(Number);
-//     const durationInHours = hours + (minutes / 60);
-
-//     // Calculate caloriesOut
-//     const caloriesOut = activity.METs * user.weight * durationInHours;
-
-//     // Save the activity log
-//     const newLog = await activityModel.create({
-//       userId,
-//       activityId,
-//       duration,
-//       date,
-//       caloriesOut
-//     });
-
-//     return res.status(201).json({
-//       message: "Activity log created successfully.",
-//       data: newLog
-//     });
-
-//   } catch (error) {
-//     console.log("❌ Error in creating activityLog:", error);
-//     return res.status(500).json({
-//       message: "Internal server error while creating activity log."
-//     });
-//   }
-// };
 const createActivityLog = async (req, res) => {
   try {
     const { userId, activityId, duration, date } = req.body;
@@ -332,8 +200,6 @@ const createActivityLog = async (req, res) => {
     });
   }
 };
-
-
   const getLogByDate = async (req, res) => {
     try {
       const { userId, date } = req.query;
@@ -360,16 +226,46 @@ const createActivityLog = async (req, res) => {
       return res.status(400).json({success:false,message:"Error in getting all logs"})
     }
   }
-  
-  const getLogsById=async (req,res)=>{
+
+  const getLogsById = async (req, res) => {
     try {
-      const log=await dailyLogModel.findById(req.params.id)
-      .populate('foodLog.foodId')
-      .populate('activityLog.activityId')
-      return res.status(200).json({success:true,data:log})
+      const log = await dailyLogModel.findById(req.params.id)
+        .populate({
+          path: 'foodLog.foodId',
+          select: 'foodName foodGroup caloriesPerServing servingSize'        })
+        .populate({
+          path: 'activityLog.activityId',
+          select: 'acitivityName description specificMotion METs'
+        });
+  
+      if (!log) {
+        return res.status(404).json({ success: false, message: "Log not found" });
+      }
+  
+      return res.status(200).json({ success: true, data: log });
     } catch (error) {
-      console.log("error in getting logs by id",error)
-      return res.status(400).json({success:false,message:"Error in getting logs by id"})
+      console.log("Error in getting logs by ID:", error);
+      return res.status(400).json({ success: false, message: "Error in getting logs by ID" });
+    }
+  };
+  
+  const getUserById = async (req, res) => {  
+    try {
+      const { userId } = req.body;
+  
+      const user = await userModel.findById(userId);
+  
+      if (!user) {
+        return res.status(404).json({ success: false, message: "User not found" });
+      }
+  
+      return res.status(200).json({ success: true, data: user });
+  
+    } catch (error) {
+      console.log("error in getting user by id", error);
+      return res.status(400).json({ success: false, message: "Error in getting user by id" });
     }
   }
-  module.exports={getLogByDate,getAllLogs,createActivityLog,getLogsById,createLog}
+  
+
+  module.exports={getLogByDate,getAllLogs,createActivityLog,getLogsById,createLog,getUserById}
