@@ -21,6 +21,8 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
+              "src/assets",
+  "src/favicon.ico",
               {
                 "glob": "**/*",
                 "input": "public"
@@ -28,6 +30,7 @@
             ],
             "styles": [
               "src/styles.css"
+              
             ],
             "scripts": [
               "src/assets/js/jquery.slim.min.js",

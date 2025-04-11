@@ -71,7 +71,15 @@
 
   <td data-label="Action">
     <div class="btn-set">
-      <a class="btn-secondary" [routerLink]="['/user-specific', log._id]">View</a>
+      <!-- <a class="btn-secondary" [routerLink]="['/user-specific', log._id]">View</a> -->
+      <a 
+      class="btn btn-secondary" 
+      [class.disabled]="loadingLogId === log._id" 
+      (click)="onLogViewClick(log._id)">
+      {{ loadingLogId === log._id ? 'Loading...' : 'View' }}
+    </a>
+    
+
     </div>
   </td>
 </tr>

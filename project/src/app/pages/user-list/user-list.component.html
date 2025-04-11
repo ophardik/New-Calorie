@@ -8,6 +8,7 @@
 </head>
 
 <body>
+    
     <div>
         <header class="header">
             <div class="container">
@@ -53,15 +54,33 @@
                                   </td>
                                 <td data-label="Action">
                                     <div class="btn-set">
-               <a class="btn btn-secondary" [routerLink]="['/user-data', user.id]">View</a>
-               <button 
+               <!-- <a class="btn btn-secondary" [routerLink]="['/user-data', user.id]">View</a> -->
+              
+               <a 
+               class="btn btn-secondary" 
+               [class.disabled]="loadingUserId === user.id" 
+               (click)="onViewClick(user.id)">
+               {{ loadingUserId === user.id ? 'Loading...' : 'View' }}
+             </a>
+             
+               <!-- <button 
                class="btn-primary add-data-btn" 
                data-toggle="modal" 
                data-target="#addDataModal"
                (click)="onSelectUser(user)"  
              >
                Add Data
-             </button>
+             </button> -->
+             <button 
+  class="btn-primary add-data-btn" 
+  data-toggle="modal" 
+  data-target="#addDataModal"
+  (click)="onSelectUser(user)"  
+  [disabled]="loadingAddDataUserId === user.id"
+>
+  {{ loadingAddDataUserId === user.id ? 'Loading...' : 'Add Data' }}
+</button>
+
                                     </div>
                                 </td>
                             </tr>

@@ -194,25 +194,25 @@ const createActivityLog = async (req, res) => {
     }
 
   } catch (error) {
-    console.log("❌ Error in creating activityLog:", error);
+    console.log(" Error in creating activityLog:", error);
     return res.status(500).json({
       message: "Internal server error while creating activity log."
     });
   }
 };
-  const getLogByDate = async (req, res) => {
-    try {
-      const { userId, date } = req.query;
-      const log = await dailyLogModel.findOne({ userId, date: new Date(date) })
-        .populate('foodLog.foodId')
-        .populate('activityLog.activityId');
-      if (!log) return res.status(404).json({ message: 'Log not found' });
-      res.json(log);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error' });
-    }
-  };
+const getLogByDate = async (req, res) => {
+  try {
+    const { userId, date } = req.query;
+    const log = await dailyLogModel.findOne({ userId, date: new Date(date) })
+      .populate('foodLog.foodId')
+      .populate('activityLog.activityId');
+    if (!log) return res.status(404).json({ message: 'Log not found' });
+    res.json(log);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
   
   const getAllLogs=async(req,res)=>{
     try {

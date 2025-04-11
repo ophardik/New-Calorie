@@ -7,11 +7,12 @@ import { DailyLogService } from '../../services/daily-log.service';
 import { UserSpecificComponent } from '../user-specific/user-specific.component';
 import { FoodListService } from '../../services/food-list.service';
 import { ActivityService } from '../../services/activity.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-data',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-data.component.html',
   styleUrl: './user-data.component.css'
 })
@@ -55,8 +56,20 @@ export class UserDataComponent implements OnInit {
     private dailyLogService: DailyLogService,
     private foodListService: FoodListService,
     private activityService: ActivityService,
+    private router: Router
     
   ) {}
+
+  loadingLogId: string | null = null;
+
+  onLogViewClick(logId: string) {
+    this.loadingLogId = logId;
+  
+    // Delay so user sees the loading message before navigation
+    setTimeout(() => {
+      this.router.navigate(['/user-specific', logId]);
+    }, 300);
+  }
 
   ngOnInit(): void {
 
@@ -131,6 +144,7 @@ export class UserDataComponent implements OnInit {
     const filtered = this.allLogs.filter((log) => {
       const logDate = new Date(log.date).toISOString().split('T')[0];
       return logDate === this.selectedDate;
+
     });
 
     this.filteredLogs = filtered;
@@ -175,7 +189,15 @@ export class UserDataComponent implements OnInit {
       next: (res) => {
         console.log(`${type} log added`, res);
         alert(`${type === 'food' ? 'Food' : 'Activity'} added successfully`);
-        
+         this.dailyLogService.allDailyLog(this.selectedUserId).subscribe({
+        next: (res: any) => {
+          this.allLogs = res.data || [];
+          this.filteredLogs = [...this.allLogs]; // refresh displayed logs
+        },
+        error: (err) => {
+          console.error("Error refreshing logs:", err);
+        }
+      });
         if (type === 'food') {
           this.foodData = {};
         } else if (type === 'activity') {
