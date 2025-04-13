@@ -17,13 +17,13 @@ try {
   let bmr = 0;
 
   if (user) {
-    const weight = user.weight || 70;
-    const height = user.height || 170;
-    const gender = user.gender || 'male';
+    const weight = user.weight ;
+    const height = user.height ;
+    const gender = user.gender;
     const age=user.age
     
 
-    if (gender === 'male') {
+    if (gender === 'Male') {
       bmr = Math.round(66.4730 + (13.7516 * weight) + (5.0033 * height) - (6.7550 * age));
     } else {
       bmr = Math.round(655.0955 + (9.5634 * weight) + (1.8496 * height) - (4.6756 * age));
@@ -59,7 +59,7 @@ try {
     totalCaloriesIn += calories;
   }
 
-  const weightInKg = 70;
+  const weightInKg = user?.weight
   let totalCaloriesOut = 0;
 
   for (const item of log.activityLog) {
@@ -93,7 +93,7 @@ try {
   log.totalCaloriesOut = totalCaloriesOut;
 
   const safeBMR = !isNaN(log.bmr) ? log.bmr : 0;
-  log.netCalories = Math.round((safeBMR + totalCaloriesIn) - totalCaloriesOut);
+  log.netCalories = Math.round(totalCaloriesIn - totalCaloriesOut);
 
   await log.save();
 
@@ -200,6 +200,7 @@ const createActivityLog = async (req, res) => {
     });
   }
 };
+
 const getLogByDate = async (req, res) => {
   try {
     const { userId, date } = req.query;
@@ -214,7 +215,7 @@ const getLogByDate = async (req, res) => {
   }
 };
   
-  const getAllLogs=async(req,res)=>{
+const getAllLogs=async(req,res)=>{
     try {
       const {userId}=req.query;
       const logs=await dailyLogModel.find({userId}).sort({date:-1})
@@ -225,9 +226,9 @@ const getLogByDate = async (req, res) => {
       console.log("error in getting all logs",error)
       return res.status(400).json({success:false,message:"Error in getting all logs"})
     }
-  }
+}
 
-  const getLogsById = async (req, res) => {
+const getLogsById = async (req, res) => {
     try {
       const log = await dailyLogModel.findById(req.params.id)
         .populate({
@@ -247,9 +248,9 @@ const getLogByDate = async (req, res) => {
       console.log("Error in getting logs by ID:", error);
       return res.status(400).json({ success: false, message: "Error in getting logs by ID" });
     }
-  };
+};
   
-  const getUserById = async (req, res) => {  
+const getUserById = async (req, res) => {  
     try {
       const { userId } = req.body;
   
@@ -265,7 +266,7 @@ const getLogByDate = async (req, res) => {
       console.log("error in getting user by id", error);
       return res.status(400).json({ success: false, message: "Error in getting user by id" });
     }
-  }
+}
   
 
   module.exports={getLogByDate,getAllLogs,createActivityLog,getLogsById,createLog,getUserById}

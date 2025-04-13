@@ -17,7 +17,7 @@ const foodModel = require("../Models/foodModel")
 // }
 const allFood = async (req, res) => {
     try {
-        const allItems = await foodModel.find({}).limit(8000).sort({ foodName: 1 });
+        const allItems = await foodModel.find({}).sort({ foodName: 1 });
 
         return res.status(200).json({
             status: "success",

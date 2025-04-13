@@ -7,12 +7,11 @@ import { FormsModule } from '@angular/forms';
 import { ActivityService } from '../../services/activity.service';
 import { FoodListService } from '../../services/food-list.service';
 import { DailyLogService } from '../../services/daily-log.service';
-import { NgSelectModule } from '@ng-select/ng-select';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule, FormsModule,  NgSelectModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './user-list.component.html',
   styleUrl: './user-list.component.css',
 })
@@ -59,6 +58,7 @@ onViewClick(userId: string) {
   uniqueActivityGroups: any;
 isAddDataLoading = false;
 loadingAddDataUserId: string | null = null;
+filteredFoodList: any[] = [];
   constructor(
     private userDetailService: UserDetailService,
     private FoodService: FoodService,
@@ -70,7 +70,14 @@ loadingAddDataUserId: string | null = null;
   
 
 
+  onFoodGroupChange() {
+    this.filteredFoodList = this.foodList.filter(
+      food => food.foodGroup === this.foodData.foodGroup
+    );
   
+    // Reset selected food if it's not part of the new group
+    this.foodData.foodId = null;
+  }
   
   loadAllFoods() {
     if (this.hasLoadedFoods) return;
@@ -98,7 +105,7 @@ loadingAddDataUserId: string | null = null;
   
   ngOnInit() {
     this.getAllUsers();
-    this.loadAllFoods();
+   
  
 
     this.AcitivityService.getAllActivity().subscribe({
@@ -136,11 +143,7 @@ loadingAddDataUserId: string | null = null;
     });
   }
 
-  // onSelectUser(user: any) {
-  //   this.selectedUserId = user.id;
-  //   this.foodData.userId = user.id;
-  //   this.activityData.userId = user.id;
-  // }
+ 
   onSelectUser(user: any) {
     this.loadingAddDataUserId = user.id;
   
@@ -148,6 +151,7 @@ loadingAddDataUserId: string | null = null;
     this.selectedUserId = user.id;
     this.foodData.userId = user.id;
     this.activityData.userId = user.id;
+    this.loadAllFoods()
   
     // Optional: Clear loading state after a short delay
     setTimeout(() => {
@@ -159,7 +163,8 @@ loadingAddDataUserId: string | null = null;
   onFoodChange() {
     const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
     if (selectedFood) {
-      this.foodData.foodName = selectedFood.foodName;
+      this.foodData.foodGroup = selectedFood.foodGroup;
+      this.foodData.foodName=selectedFood.foodName
     }
   }
 

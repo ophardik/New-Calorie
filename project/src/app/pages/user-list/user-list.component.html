@@ -46,15 +46,18 @@
                                 <td data-label="Gender">{{user.gender}}</td>
                                 <td data-label="Age">{{user.age}}</td>
                                 <td data-label="BMR">
-                                    {{
-                                      user.gender === 'male'
-                                        ? (66.4730 + (13.7516 * user.weight) + (5.0033 * user.height) - (6.7550 * user.age) | number : '1.0-0')
-                                        : (655.0955 + (9.5634 * user.weight) + (1.8496 * user.height) - (4.6756 * user.age) | number : '1.0-0')
-                                    }}
+                                   {{
+  (user.gender.toLowerCase() === 'male'
+    ? (66.4730 + (13.7516 * +user.weight) + (5.0033 * +user.height) - (6.7550 * +user.age))
+    : (655.0955 + (9.5634 * +user.weight) + (1.8496 * +user.height) - (4.6756 * +user.age))
+  ) | number:'1.0-0'
+}}
+
+                                      
                                   </td>
                                 <td data-label="Action">
                                     <div class="btn-set">
-               <!-- <a class="btn btn-secondary" [routerLink]="['/user-data', user.id]">View</a> -->
+          
               
                <a 
                class="btn btn-secondary" 
@@ -63,14 +66,7 @@
                {{ loadingUserId === user.id ? 'Loading...' : 'View' }}
              </a>
              
-               <!-- <button 
-               class="btn-primary add-data-btn" 
-               data-toggle="modal" 
-               data-target="#addDataModal"
-               (click)="onSelectUser(user)"  
-             >
-               Add Data
-             </button> -->
+               
              <button 
   class="btn-primary add-data-btn" 
   data-toggle="modal" 
@@ -119,33 +115,35 @@
                                 <label>Select Date</label>
                                 <input type="date" [(ngModel)]="foodData.date">
                             </div>
-
-                            <div class="input-field">
-                                <label>Select Food Name</label>
-                                <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()">
-                                  <option *ngFor="let food of foodList" [value]="food._id">
-                                    {{ food.foodName }}
-                                  </option>
-                                </select>
-                              </div>
-                              
-                              <div class="input-field">
-                                <label>Select Meal Type</label>
-                                <select class="selectbox" [(ngModel)]="foodData.mealType">
-                                    <option>Breakfast</option>
-                                    <option>Lunch</option>
-                                    <option>Dinner</option>
-                                </select>
-                            </div>
-
-                            <div class="input-field">
-                                <label>Select Food Group</label>
-                                <select class="selectbox" [(ngModel)]="foodData.foodGroup">
-                                    <option *ngFor="let group of uniqueFoodGroups" [value]="group">
-                                        {{ group }}
-                                      </option>
-                                </select>
-                            </div>
+<!-- Food Group Dropdown -->
+<div class="input-field">
+    <label>Select Food Group</label>
+    <select class="selectbox" [(ngModel)]="foodData.foodGroup" (change)="onFoodGroupChange()">
+      <option *ngFor="let group of uniqueFoodGroups" [value]="group">{{ group }}</option>
+    </select>
+  </div>
+  
+  <!-- Food Name Dropdown (Visibly disabled until Food Group is selected) -->
+  <div class="input-field">
+    <label>Select Food Name</label>
+    <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()" [disabled]="!foodData.foodGroup">
+      <option *ngIf="!foodData.foodGroup" value="" disabled selected>Please select a Food Group first</option>
+      <option *ngFor="let food of filteredFoodList" [value]="food._id">
+        {{ food.foodName }}
+      </option>
+    </select>
+  </div>
+  
+  <!-- Meal Type -->
+  <div class="input-field">
+    <label>Select Meal Type</label>
+    <select class="selectbox" [(ngModel)]="foodData.mealType">
+      <option>Breakfast</option>
+      <option>Lunch</option>
+      <option>Dinner</option>
+    </select>
+  </div>
+  
                             <div class="input-field">
                                 <label>Serving</label>
                                 <input type="text" placeholder="Serving" [(ngModel)]="foodData.portion"/>

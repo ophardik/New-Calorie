@@ -85,7 +85,7 @@
 </tr>
 
         <tr *ngIf="filteredLogs.length === 0">
-          <td colspan="6" class="text-center">No data found for selected date.</td>
+          <td colspan="6" class="text-center">No Food Or Activities Added!</td>
         </tr>
       </tbody>
     </table>
@@ -125,31 +125,34 @@
                                 <input type="date" [(ngModel)]="foodData.date">
                             </div>
 
-                            <div class="input-field">
-                                <label>Select Food Name</label>
-                                <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()">
-                                    <option *ngFor="let food of foodList" [value]="food._id">
-                                        {{ food.foodName }}
-                                      </option>
-                                </select>
-                            </div>
-                            <div class="input-field">
+                          <!-- Food Group Dropdown -->
+<div class="input-field">
+    <label>Select Food Group</label>
+    <select class="selectbox" [(ngModel)]="foodData.foodGroup" (change)="onFoodGroupChange()">
+      <option *ngFor="let group of uniqueFoodGroups" [value]="group">{{ group }}</option>
+    </select>
+  </div>
+  
+  <!-- Food Name Dropdown (Visibly disabled until Food Group is selected) -->
+  <div class="input-field">
+    <label>Select Food Name</label>
+    <select class="selectbox" [(ngModel)]="foodData.foodId" (change)="onFoodChange()" [disabled]="!foodData.foodGroup">
+      <option *ngIf="!foodData.foodGroup" value="" disabled selected>Please select a Food Group first</option>
+      <option *ngFor="let food of filteredFoodList" [value]="food._id">
+        {{ food.foodName }}
+      </option>
+    </select>
+  </div>
+                              
+                              <!-- Meal Type -->
+                              <div class="input-field">
                                 <label>Select Meal Type</label>
                                 <select class="selectbox" [(ngModel)]="foodData.mealType">
-                                    <option>Breakfast</option>
-                                    <option>Lunch</option>
-                                    <option>Dinner</option>
+                                  <option>Breakfast</option>
+                                  <option>Lunch</option>
+                                  <option>Dinner</option>
                                 </select>
-                            </div>
-
-                            <div class="input-field">
-                                <label>Select Food Group</label>
-                                <select class="selectbox" [(ngModel)]="foodData.foodGroup">
-                                    <option *ngFor="let group of uniqueFoodGroups" [value]="group">
-                                        {{ group }}
-                                      </option>
-                                </select>
-                            </div>
+                              </div>
                             <div class="input-field">
                                 <label>Serving</label>
                                 <input type="text" placeholder="Serving" [(ngModel)]="foodData.portion"/>

@@ -49,6 +49,16 @@ export class UserDataComponent implements OnInit {
     description: '',
     METvalue: ''
   };
+  filteredFoodList: any[] = [];
+
+  onFoodGroupChange() {
+    this.filteredFoodList = this.foodList.filter(
+      food => food.foodGroup === this.foodData.foodGroup
+    );
+  
+    // Reset selected food if it's not part of the new group
+    this.foodData.foodId = null;
+  }
 
   constructor(
     private route: ActivatedRoute,
@@ -73,14 +83,7 @@ export class UserDataComponent implements OnInit {
 
   ngOnInit(): void {
 
-    this.foodListService.getAllFood().subscribe({
-      next: (res: any) => {
-        this.foodList = res.data || [];
-        this.uniqueFoodGroups = Array.from(new Set(this.foodList.map(f => f.foodGroup).filter(Boolean)));
-      },
-      error: (err) => console.error("error fetching foodList", err)
-    });
-
+  
 
 
     this.userId = this.route.snapshot.paramMap.get('id');
@@ -119,6 +122,14 @@ export class UserDataComponent implements OnInit {
     }
   }
   onSelectUser(user: any) {
+    this.foodListService.getAllFood().subscribe({
+      next: (res: any) => {
+        this.foodList = res.data || [];
+        this.uniqueFoodGroups = Array.from(new Set(this.foodList.map(f => f.foodGroup).filter(Boolean)));
+      },
+      error: (err) => console.error("error fetching foodList", err)
+    });
+
     const userIdFromRoute = this.route.snapshot.paramMap.get('id');
     console.log("Selected User ID from route:", userIdFromRoute);
     if (userIdFromRoute) {
@@ -132,7 +143,8 @@ export class UserDataComponent implements OnInit {
   onFoodChange() {
     const selectedFood = this.foodList.find(f => f._id === this.foodData.foodId);
     if (selectedFood) {
-      this.foodData.foodName = selectedFood.foodName;
+      this.foodData.foodGroup = selectedFood.foodGroup;
+      this.foodData.foodName=selectedFood.foodName
     }
   }
   fetchLogByDate() {
